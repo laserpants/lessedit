@@ -1,0 +1,39 @@
+<p>
+Permission to use, copy, modify, and distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+</p>
+<p>
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+</p>
+<h3>Markdown/SmartyPants</h3>
+Markdown is copyright &copy; 2003-2004 John Gruber <a href="http://daringfireball.net">http://daringfireball.net</a>.<br>All rights reserved.
+<h3>Sundown</h3>
+<p>
+Sundown is based on the original Upskirt parser by Natacha Port&eacute;, with many additions by Vicent Marti (@tanoku) and contributions from the following authors:
+<blockquote>
+Ben Noordhuis,<br>Bruno Michel,<br>Joseph Koshy,<br>Krzysztof Kowalczyk,<br>Samuel Bronson,<br>Shuhei Tanuma
+</blockquote>
+</p>
+<h3>Qt</h3>
+Qt is &copy; 2008-2011 Nokia Corporation and/or its subsidiaries and is used under the GNU LGPL version 2.1 license.
+<h3>WebKit</h3>
+<p>WebKit is licensed under the GNU Library General Public License.</p>
+<h3>Tidy (libtidy)</h3>
+<p>
+Tidy was written by Dave Raggett &lt;dsr@w3.org&gt;, and is now maintained and developed by the Tidy team at <a href="http://tidy.sourceforge.net">http://tidy.sourceforge.net</a>. It is released under the MIT Licence.
+</p>
+<h3>QtFindReplaceDialog</h3>
+<p>
+Copyright &copy; 2009  Lorenzo Bettini <a href="http://www.lorenzobettini.it">http://www.lorenzobettini.it<a/></p>
+<h3>Icon design</h3>
+<p>
+Icon design based on original artwork by psdGraphics. <a href="http://www.psdgraphics.com">www.psdgraphics.com</a>
+</p>
+&nbsp;
