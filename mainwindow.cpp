@@ -106,7 +106,10 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
 
     view->setHtml("<html></html>");
     view->setContextMenuPolicy(Qt::CustomContextMenu);
+<<<<<<< HEAD
     view->setAcceptDrops(false);
+=======
+>>>>>>> ab08eb3d2bf6f56c91e4ed66d7176bbd88c1395f
     mainWindow->connect(view, SIGNAL(customContextMenuRequested(QPoint)),
                         mainWindow, SLOT(showViewContextMenu(QPoint)));
 
@@ -131,8 +134,11 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     QObject::connect(editor, SIGNAL(customContextMenuRequested(QPoint)),
                      mainWindow, SLOT(showEditorContextMenu(QPoint)));
 
+<<<<<<< HEAD
     editor->setAcceptDrops(true);
 
+=======
+>>>>>>> ab08eb3d2bf6f56c91e4ed66d7176bbd88c1395f
     /* File menu */
 
     fileMenu->removeAction(printAction);        // temp
@@ -260,7 +266,12 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
 
     //
 
+<<<<<<< HEAD
     QString css = "body { margin: 0; padding: 0 9px; font-family: sans-serif; }";
+=======
+    QString css = "body { margin: 0; padding: 0 9px; font-family: sans-serif; }\n"
+                  "blockquote { font-style: italic; }";
+>>>>>>> ab08eb3d2bf6f56c91e4ed66d7176bbd88c1395f
 
     QFile cssFile(":/styles.css");
     if (cssFile.open(QFile::ReadOnly)) {
@@ -287,7 +298,10 @@ tdMainWindow::tdMainWindow(QWidget *parent)
     connect(ui->smartypantsAction, SIGNAL(toggled(bool)), renderer, SLOT(setSmartypantsEnabled(bool)));
     connect(renderer, SIGNAL(smartypantsEnabledChanged()), this, SLOT(updateSource()));
     connect(ui->editor, SIGNAL(modificationChanged(bool)), this, SLOT(setModificationStatus(bool)));
+<<<<<<< HEAD
     connect(ui->editor, SIGNAL(loadFileRequest(QString)), this, SLOT(loadFile(QString)));
+=======
+>>>>>>> ab08eb3d2bf6f56c91e4ed66d7176bbd88c1395f
 
     statusBar()->show();
 
@@ -536,7 +550,28 @@ void tdMainWindow::openFile()
 {
     if (!confirmSaveIfModified())
         return;
+<<<<<<< HEAD
     loadFile(QFileDialog::getOpenFileName(this, tr("Open")), false);
+=======
+
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open"));
+
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
+        return;
+
+    tdMainWindow::file = filename;
+    QFileInfo info(file);
+
+    ui->editor->clear();
+    renderer->refreshAll();
+
+    ui->editor->document()->setPlainText(file.readAll());
+    file.close();
+
+    setWindowTitle(info.fileName());
+    ui->editor->document()->setModified(false);
+>>>>>>> ab08eb3d2bf6f56c91e4ed66d7176bbd88c1395f
 }
 
 void tdMainWindow::saveFile()
@@ -585,6 +620,7 @@ void tdMainWindow::exportHtml()
     file.close();
 }
 
+<<<<<<< HEAD
 void tdMainWindow::loadFile(QString filename, bool confirm)
 {
     if (confirm && !confirmSaveIfModified())
@@ -607,6 +643,8 @@ void tdMainWindow::loadFile(QString filename, bool confirm)
     ui->editor->document()->setModified(false);
 }
 
+=======
+>>>>>>> ab08eb3d2bf6f56c91e4ed66d7176bbd88c1395f
 void tdMainWindow::saveAndClose(QString name)
 {
     QFile file(name);
