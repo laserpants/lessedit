@@ -89,6 +89,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
       selectAllAction(editMenu->addAction(QObject::tr("Select &All"))),
       findAction(editMenu->addAction(QObject::tr("&Find/Replace"))),
       findNextAction(editMenu->addAction(QObject::tr("Find &Next"))),
+      editorModeAction(optionsMenu->addAction(QObject::tr("Show Editor"))),
       wordWrapAction(optionsMenu->addAction(QObject::tr("&Word Wrap"))),
       lineNumbersAction(optionsMenu->addAction(QObject::tr("&Line Numbers"))),
       smartypantsAction(optionsMenu->addAction(QObject::tr("&SmartyPants"))),
@@ -124,7 +125,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     source->setReadOnly(true);
     source->setFont(QFont("monospace"));
 
-    tabWidget->addTab(splitter, QObject::tr("Editor"));
+    tabWidget->addTab(splitter, QObject::tr("Markdown"));
     tabWidget->addTab(source, QObject::tr("HTML Source"));
 
     editor->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -227,6 +228,9 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
 
     /* Options menu */
 
+    editorModeAction->setCheckable(true);
+    editorModeAction->setChecked(true);
+
     wordWrapAction->setCheckable(true);
     wordWrapAction->setChecked(false);
 
@@ -238,6 +242,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
 
     mainWindow->connect(wordWrapAction, SIGNAL(toggled(bool)), editor, SLOT(setWordWrapEnabled(bool)));
     mainWindow->connect(lineNumbersAction, SIGNAL(toggled(bool)), editor, SLOT(setLineNumbersEnabled(bool)));
+    mainWindow->connect(editorModeAction, SIGNAL(toggled(bool)), mainWindow, SLOT(setEditorEnabled(bool)));
 
     /* Help menu */
 
@@ -601,6 +606,16 @@ void tdMainWindow::loadFile(QString filename, bool confirm)
     f.close();
     setWindowTitle(info.fileName());
     ui->editor->document()->setModified(false);
+}
+
+void tdMainWindow::setEditorEnabled(bool enabled)
+{
+    if (enabled)
+        ui->editor->show();
+    else
+        ui->editor->hide();
+    ui->wordWrapAction->setEnabled(enabled);
+    ui->lineNumbersAction->setEnabled(enabled);
 }
 
 void tdMainWindow::saveAndClose(QString name)

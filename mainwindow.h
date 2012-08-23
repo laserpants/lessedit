@@ -54,6 +54,7 @@ struct tdMainWindowUi
     QAction      *const selectAllAction;
     QAction      *const findAction;
     QAction      *const findNextAction;
+    QAction      *const editorModeAction;
     QAction      *const wordWrapAction;
     QAction      *const lineNumbersAction;
     QAction      *const smartypantsAction;
@@ -110,6 +111,7 @@ protected slots:
     void exportPdf();
     void exportHtml();
     void loadFile(QString filename, bool confirm = true);
+    void setEditorEnabled(bool enabled);
 
 private:
     void saveAndClose(QString name);
