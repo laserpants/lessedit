@@ -1,6 +1,8 @@
 #include <QFont>
 #include <QPainter>
 #include <QTextBlock>
+#include <QUrl>
+#include <QDebug>
 #include "codewidget.h"
 
 tdCodeWidget::tdCodeWidget(QWidget *parent)
@@ -34,6 +36,20 @@ int tdCodeWidget::lineNumberAreaWidth() const
         digits = 2;
     int space = 6 + fontMetrics().width(QLatin1Char('9')) * digits;
     return space;
+}
+
+bool tdCodeWidget::canInsertFromMimeData(const QMimeData *source) const
+{
+    if (source->hasUrls() && (1 == source->urls().count()))
+        return true;
+    return QPlainTextEdit::canInsertFromMimeData(source);
+}
+
+void tdCodeWidget::insertFromMimeData(const QMimeData *source)
+{
+    if (source->hasUrls())
+        emit loadFileRequest(source->urls().first().encodedPath());
+    QPlainTextEdit::insertFromMimeData(source);
 }
 
 void tdCodeWidget::setWordWrapEnabled(bool enabled)

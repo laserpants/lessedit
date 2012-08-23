@@ -106,6 +106,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
 
     view->setHtml("<html></html>");
     view->setContextMenuPolicy(Qt::CustomContextMenu);
+    view->setAcceptDrops(false);
     mainWindow->connect(view, SIGNAL(customContextMenuRequested(QPoint)),
                         mainWindow, SLOT(showViewContextMenu(QPoint)));
 
@@ -129,6 +130,8 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     editor->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(editor, SIGNAL(customContextMenuRequested(QPoint)),
                      mainWindow, SLOT(showEditorContextMenu(QPoint)));
+
+    editor->setAcceptDrops(true);
 
     /* File menu */
 
@@ -257,8 +260,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
 
     //
 
-    QString css = "body { margin: 0; padding: 0 9px; font-family: sans-serif; }\n"
-                  "blockquote { font-style: italic; }";
+    QString css = "body { margin: 0; padding: 0 9px; font-family: sans-serif; }";
 
     QFile cssFile(":/styles.css");
     if (cssFile.open(QFile::ReadOnly)) {
@@ -285,6 +287,7 @@ tdMainWindow::tdMainWindow(QWidget *parent)
     connect(ui->smartypantsAction, SIGNAL(toggled(bool)), renderer, SLOT(setSmartypantsEnabled(bool)));
     connect(renderer, SIGNAL(smartypantsEnabledChanged()), this, SLOT(updateSource()));
     connect(ui->editor, SIGNAL(modificationChanged(bool)), this, SLOT(setModificationStatus(bool)));
+    connect(ui->editor, SIGNAL(loadFileRequest(QString)), this, SLOT(loadFile(QString)));
 
     statusBar()->show();
 
@@ -533,24 +536,7 @@ void tdMainWindow::openFile()
 {
     if (!confirmSaveIfModified())
         return;
-
-    QString filename = QFileDialog::getOpenFileName(this, tr("Open"));
-
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
-        return;
-
-    tdMainWindow::file = filename;
-    QFileInfo info(file);
-
-    ui->editor->clear();
-    renderer->refreshAll();
-
-    ui->editor->document()->setPlainText(file.readAll());
-    file.close();
-
-    setWindowTitle(info.fileName());
-    ui->editor->document()->setModified(false);
+    loadFile(QFileDialog::getOpenFileName(this, tr("Open")), false);
 }
 
 void tdMainWindow::saveFile()
@@ -597,6 +583,28 @@ void tdMainWindow::exportHtml()
     QTextStream stream(&file);
     stream << html;
     file.close();
+}
+
+void tdMainWindow::loadFile(QString filename, bool confirm)
+{
+    if (confirm && !confirmSaveIfModified())
+        return;
+
+    QFile f(filename);
+    if (!f.open(QIODevice::ReadWrite | QIODevice::Text))
+        return;
+
+    file = filename;
+    QFileInfo info(f);
+
+    ui->editor->clear();
+    renderer->refreshAll();
+
+    ui->editor->document()->setPlainText(f.readAll());
+    f.close();
+
+    setWindowTitle(info.fileName());
+    ui->editor->document()->setModified(false);
 }
 
 void tdMainWindow::saveAndClose(QString name)

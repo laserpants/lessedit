@@ -111,6 +111,7 @@ protected slots:
     void print();
     void exportPdf();
     void exportHtml();
+    void loadFile(QString filename, bool confirm = true);
 
 private:
     void saveAndClose(QString name);
