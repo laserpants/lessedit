@@ -265,7 +265,6 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     QFile cssFile(":/styles.css");
     if (cssFile.open(QFile::ReadOnly)) {
         css.append(cssFile.readAll());
-        //QWebElement body = mf->findFirstElement("body");
         QWebElement body = de.findFirst("body");
         body.addClass("markdown-body");
     }
