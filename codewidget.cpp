@@ -1,11 +1,8 @@
 #include <QFont>
 #include <QPainter>
 #include <QTextBlock>
-<<<<<<< HEAD
 #include <QUrl>
 #include <QDebug>
-=======
->>>>>>> ab08eb3d2bf6f56c91e4ed66d7176bbd88c1395f
 #include "codewidget.h"
 
 tdCodeWidget::tdCodeWidget(QWidget *parent)
@@ -41,7 +38,6 @@ int tdCodeWidget::lineNumberAreaWidth() const
     return space;
 }
 
-<<<<<<< HEAD
 bool tdCodeWidget::canInsertFromMimeData(const QMimeData *source) const
 {
     if (source->hasUrls() && (1 == source->urls().count()))
@@ -56,8 +52,6 @@ void tdCodeWidget::insertFromMimeData(const QMimeData *source)
     QPlainTextEdit::insertFromMimeData(source);
 }
 
-=======
->>>>>>> ab08eb3d2bf6f56c91e4ed66d7176bbd88c1395f
 void tdCodeWidget::setWordWrapEnabled(bool enabled)
 {
     setWordWrapMode(enabled ? QTextOption::WordWrap : QTextOption::NoWrap);

@@ -14,15 +14,12 @@ public:
 
     int lineNumberAreaWidth() const;
 
-<<<<<<< HEAD
     bool canInsertFromMimeData(const QMimeData *source) const;
     void insertFromMimeData(const QMimeData *source);
 
 signals:
     void loadFileRequest(QString);
 
-=======
->>>>>>> ab08eb3d2bf6f56c91e4ed66d7176bbd88c1395f
 public slots:
     void setWordWrapEnabled(bool enabled);
     void setLineNumbersEnabled(bool enabled);
