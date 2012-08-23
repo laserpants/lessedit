@@ -3,8 +3,6 @@
 
 #include <QSyntaxHighlighter>
 
-#include <QDebug>
-
 class tdHtmlHighlighter : public QSyntaxHighlighter
 {
     Q_OBJECT

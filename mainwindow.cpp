@@ -595,13 +595,10 @@ void tdMainWindow::loadFile(QString filename, bool confirm)
 
     file = filename;
     QFileInfo info(f);
-
     ui->editor->clear();
     renderer->refreshAll();
-
     ui->editor->document()->setPlainText(f.readAll());
     f.close();
-
     setWindowTitle(info.fileName());
     ui->editor->document()->setModified(false);
 }
