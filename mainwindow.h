@@ -116,6 +116,7 @@ protected slots:
 private:
     void saveAndClose(QString name);
     bool confirmSaveIfModified();
+    QString filePath() const;
 
     tdMainWindowUi    *const ui;
     tdHtmlHighlighter *const highlighter;

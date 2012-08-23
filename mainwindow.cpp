@@ -254,27 +254,21 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
 
     //
 
-    QWebFrame *mf = view->page()->mainFrame();
-    QWebElement styleElement = mf->findFirstElement("style");
+    QWebElement de = view->page()->mainFrame()->documentElement();
+    QWebElement styleElement = de.findFirst("style");
     if (styleElement.isNull()) {
-        QWebElement head = mf->findFirstElement("head");
+        QWebElement head = de.findFirst("head");
         head.appendInside("<style type=\"text/css\"></style>");
-        styleElement = mf->findFirstElement("style");
+        styleElement = de.findFirst("style");
     }
-
-    //
-
-    QString css = "body { margin: 0; padding: 0 9px; font-family: sans-serif; }";
-
+    QString css = "body { margin:0; padding:0 9px; font-family:sans-serif; }";
     QFile cssFile(":/styles.css");
     if (cssFile.open(QFile::ReadOnly)) {
         css.append(cssFile.readAll());
-        QWebElement body = mf->findFirstElement("body");
+        //QWebElement body = mf->findFirstElement("body");
+        QWebElement body = de.findFirst("body");
         body.addClass("markdown-body");
     }
-
-    //
-
     styleElement.setPlainText(css);
 }
 
@@ -540,7 +534,11 @@ void tdMainWindow::openFile()
 {
     if (!confirmSaveIfModified())
         return;
-    loadFile(QFileDialog::getOpenFileName(this, tr("Open")), false);
+
+    loadFile(QFileDialog::getOpenFileName(this, tr("Open"), filePath(),
+                                          "Markdown files (*.md *.markdown);;"
+                                          "Text files (*.txt);;"
+                                          "Any files (*.*)"), false);
 }
 
 void tdMainWindow::saveFile()
@@ -552,7 +550,8 @@ void tdMainWindow::saveFile()
 
 void tdMainWindow::saveFileAs()
 {
-    saveAndClose(QFileDialog::getSaveFileName(this, tr("Save File")));
+    QString fn = file.isEmpty() ? "Untitled.md" : file;
+    saveAndClose(QFileDialog::getSaveFileName(this, tr("Save File"), filePath() + "/" + fn));
 }
 
 void tdMainWindow::print()
@@ -662,4 +661,12 @@ bool tdMainWindow::confirmSaveIfModified()
         return true;
     } // end switch
     return false;
+}
+
+QString tdMainWindow::filePath() const
+{
+    if (file.isEmpty())
+        return QDir::homePath();
+    QFileInfo info(file);
+    return info.path();
 }
