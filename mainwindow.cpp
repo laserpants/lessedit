@@ -614,6 +614,7 @@ void tdMainWindow::setEditorEnabled(bool enabled)
         ui->editor->show();
     else
         ui->editor->hide();
+    //
     ui->wordWrapAction->setEnabled(enabled);
     ui->lineNumbersAction->setEnabled(enabled);
 }
