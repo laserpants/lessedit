@@ -14,6 +14,7 @@
 #include <QPrintDialog>
 #include <QPrinter>
 #include <QMessageBox>
+#include <QApplication>
 #include <QDebug>
 #include "mainwindow.h"
 #include "codewidget.h"
@@ -44,9 +45,8 @@ tdAboutDialog::tdAboutDialog(QWidget *parent)
     credits->setReadOnly(true);
 
     QFile file(":/credits.txt");
-    if (file.open(QFile::ReadOnly)) {
+    if (file.open(QFile::ReadOnly))
         credits->setHtml(file.readAll());
-    }
 
     QHBoxLayout *hlayout = new QHBoxLayout;
 
@@ -163,7 +163,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     mainWindow->connect(openAction, SIGNAL(triggered()), mainWindow, SLOT(openFile()));
     mainWindow->connect(saveAction, SIGNAL(triggered()), mainWindow, SLOT(saveFile()));
     mainWindow->connect(saveAsAction, SIGNAL(triggered()), mainWindow, SLOT(saveFileAs()));
-    mainWindow->connect(printAction, SIGNAL(triggered()), mainWindow, SLOT(print()));
+    //mainWindow->connect(printAction, SIGNAL(triggered()), mainWindow, SLOT(print()));
     mainWindow->connect(exportPdfAction, SIGNAL(triggered()), mainWindow, SLOT(exportPdf()));
     mainWindow->connect(exportHtmlAction, SIGNAL(triggered()), mainWindow, SLOT(exportHtml()));
 
@@ -230,6 +230,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
 
     editorModeAction->setCheckable(true);
     editorModeAction->setChecked(true);
+    editorModeAction->setShortcut(QKeySequence("Ctrl+E"));
 
     wordWrapAction->setCheckable(true);
     wordWrapAction->setChecked(false);
@@ -489,8 +490,7 @@ void tdMainWindow::triggerRedo()
 
 void tdMainWindow::cut()
 {
-    if (TabEditor == ui->tabWidget->currentIndex()
-            && ui->editor->hasFocus())
+    if (TabEditor == ui->tabWidget->currentIndex() && ui->editor->hasFocus())
         ui->editor->cut();
 }
 
@@ -527,6 +527,7 @@ void tdMainWindow::newFile()
 
     setWindowTitle(tr("(Untitled)"));
     file.clear();
+    updateSource();
 }
 
 void tdMainWindow::openFile()
@@ -538,46 +539,71 @@ void tdMainWindow::openFile()
                                           "Markdown files (*.md *.markdown);;"
                                           "Text files (*.txt);;"
                                           "Any files (*.*)"), false);
+    updateSource();
 }
 
 void tdMainWindow::saveFile()
 {
     if (file.isNull())
         return saveFileAs();
-    saveAndClose(file);
+    writeToFile(file);
 }
 
 void tdMainWindow::saveFileAs()
 {
-    QString fn = file.isEmpty() ? "Untitled.md" : file;
-    saveAndClose(QFileDialog::getSaveFileName(this, tr("Save File"), filePath() + "/" + fn));
+    QString name = QFileDialog::getSaveFileName(this, tr("Save File"),
+                        filePath() + "/" + (file.isEmpty() ? "Untitled.md" : file));
+    if (!name.isEmpty())
+        writeToFile(name);
 }
 
-void tdMainWindow::print()
-{
-    // @todo
-    QPrinter printer;
-    QPrintDialog printDialog(&printer, this);
-    printDialog.setOption(QPrintDialog::PrintPageRange, false);
-    if (printDialog.exec() == QDialog::Accepted) {
-        qDebug() << "...printing??";
-    }
-}
+//void tdMainWindow::print()
+//{
+//    // @todo
+//    QPrinter printer;
+//    QPrintDialog printDialog(&printer, this);
+//    printDialog.setOption(QPrintDialog::PrintPageRange, false);
+//    if (printDialog.exec() == QDialog::Accepted) {
+//        qDebug() << "...printing??";
+//    }
+//}
 
 void tdMainWindow::exportPdf()
 {
+    QString fname;
+    if (file.isEmpty()) {
+        fname = QDir::homePath() + "/Untitled.pdf";
+    } else {
+        QFileInfo info(file);
+        fname = info.path() + "/" + info.baseName() + ".pdf";
+    }
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
     QPrinter printer;
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(QFileDialog::getSaveFileName(this, tr("Save PDF as"),
-                                                           "", "*.pdf"));
+                                                           fname, "*.pdf"));
     ui->view->print(&printer);
+
+    QApplication::restoreOverrideCursor();
 }
 
 void tdMainWindow::exportHtml()
 {
-    QFile file(QFileDialog::getSaveFileName(this, tr("Save HTML"), "", "*.html"));
+    QString fname;
+    if (file.isEmpty()) {
+        fname = QDir::homePath() + "/index.html";
+    } else {
+        QFileInfo info(file);
+        fname = info.path() + "/" + info.baseName() + ".html";
+    }
+    QFile file(QFileDialog::getSaveFileName(this, tr("Save HTML"),
+                                            fname, "*.html"));
     if (!file.open(QFile::WriteOnly))
         return;
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
 
     updateSource();
     QString html = "<!DOCTYPE html>\n<html>\n<head>\n<title>Untitled</title>\n</head>\n<body>\n"
@@ -585,6 +611,8 @@ void tdMainWindow::exportHtml()
     QTextStream stream(&file);
     stream << html;
     file.close();
+
+    QApplication::restoreOverrideCursor();
 }
 
 void tdMainWindow::loadFile(QString filename, bool confirm)
@@ -600,7 +628,9 @@ void tdMainWindow::loadFile(QString filename, bool confirm)
     QFileInfo info(f);
     ui->editor->clear();
     renderer->refreshAll();
+    QApplication::setOverrideCursor(Qt::WaitCursor);
     ui->editor->document()->setPlainText(f.readAll());
+    QApplication::restoreOverrideCursor();
     f.close();
     setWindowTitle(info.fileName());
     ui->editor->document()->setModified(false);
@@ -617,7 +647,7 @@ void tdMainWindow::setEditorEnabled(bool enabled)
     ui->lineNumbersAction->setEnabled(enabled);
 }
 
-void tdMainWindow::saveAndClose(QString name)
+void tdMainWindow::writeToFile(QString name)
 {
     QFile file(name);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -625,10 +655,12 @@ void tdMainWindow::saveAndClose(QString name)
 
     tdMainWindow::file = name;
 
+    QApplication::setOverrideCursor(Qt::WaitCursor);
     QTextStream stream(&file);
     stream << ui->editor->toPlainText();
     QFileInfo info(file);
     file.close();
+    QApplication::restoreOverrideCursor();
     setWindowTitle(info.fileName());
     ui->editor->document()->setModified(false);
 }

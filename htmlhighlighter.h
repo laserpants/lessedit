@@ -12,7 +12,10 @@ public:
         Entity,
         Tag,
         Comment,
-        LastConstruct = Comment
+        TagAttr,
+        Quote,
+        QuoteUri,
+        LastConstruct = QuoteUri
     };
 
     tdHtmlHighlighter(QTextDocument *document);
@@ -26,13 +29,18 @@ protected:
     enum State {
         NormalState = -1,
         InComment,
-        InTag
+        InTag,
+        InTagAttr,
+        InQuote,
+        InQuoteUri
     };
 
     void highlightBlock(const QString &text);
 
 private:
     QTextCharFormat m_formats[LastConstruct + 1];
+    QByteArray attr;
+    QByteArray attrName;
 };
 
 #endif // HTMLHIGHLIGHTER_H

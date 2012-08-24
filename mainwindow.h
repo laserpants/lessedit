@@ -107,14 +107,14 @@ protected slots:
     void openFile();
     void saveFile();
     void saveFileAs();
-    void print();
+    //void print();
     void exportPdf();
     void exportHtml();
     void loadFile(QString filename, bool confirm = true);
     void setEditorEnabled(bool enabled);
 
 private:
-    void saveAndClose(QString name);
+    void writeToFile(QString name);
     bool confirmSaveIfModified();
     QString filePath() const;
 
