@@ -214,7 +214,7 @@ void tdRenderer::render(QByteArray ba)
         m_indices.insert(pos++, m_index);
 
         if (m_pants) {
-            //bytes.replace(0x39, "&#8217");      // ?
+            //bytes.replace(0x39, "&#8217");
             bufreset(m_tmpbuffer);
             sdhtml_smartypants(m_tmpbuffer, (const uint8_t *) bytes.constData(), bytes.size());
             QByteArray pants((const char *) m_tmpbuffer->data, m_tmpbuffer->size);
