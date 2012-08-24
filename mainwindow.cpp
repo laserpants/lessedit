@@ -105,7 +105,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     mainWindow->setCentralWidget(tabWidget);
     tabWidget->setTabPosition(QTabWidget::West);
 
-    view->setHtml("<html></html>");
+    view->setHtml("<html><head><style></style></head><body></body></html>");
     view->setContextMenuPolicy(Qt::CustomContextMenu);
     view->setAcceptDrops(false);
     mainWindow->connect(view, SIGNAL(customContextMenuRequested(QPoint)),
