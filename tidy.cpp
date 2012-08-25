@@ -1,5 +1,4 @@
 #include <Qt>
-#include <QDebug>
 #include <QString>
 #include "tidy.h"
 

@@ -32,9 +32,7 @@ int tdCodeWidget::lineNumberAreaWidth() const
         max /= 10;
         ++digits;
     }
-    if (digits < 2)
-        digits = 2;
-    int space = 6 + fontMetrics().width(QLatin1Char('9')) * digits;
+    int space = 6 + fontMetrics().width(QLatin1Char('9')) * qMax(digits, 2);
     return space;
 }
 
@@ -119,7 +117,7 @@ void tdCodeWidget::paintLineNumbers(QPaintEvent *event)
         if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(blockNumber + 1);
             painter.setPen(Qt::darkGray);
-            painter.drawText(0, top, m_lineNumberWidget->width() - 2, fontMetrics().height(),
+            painter.drawText(4, top, m_lineNumberWidget->width() - 8, fontMetrics().height(),
                              Qt::AlignRight, number);
         }
         block = block.next();

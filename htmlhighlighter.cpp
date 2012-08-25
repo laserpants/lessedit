@@ -1,4 +1,3 @@
-#include <QDebug>
 #include "htmlhighlighter.h"
 
 tdHtmlHighlighter::tdHtmlHighlighter(QTextDocument *document)
@@ -107,6 +106,7 @@ void tdHtmlHighlighter::highlightBlock(const QString &text)
             break;
         case InTagAttr:
             start = pos;
+            attr.clear();
             while (pos < len) {
                 QChar ch = text.at(pos);
                 if (ch == '>') {

@@ -12,7 +12,6 @@ class tdAboutDialog : public QDialog
 
 public:
     explicit tdAboutDialog(QWidget *parent = 0);
-
     ~tdAboutDialog() {}
 };
 
