@@ -192,6 +192,8 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     copyAction->setIconVisibleInMenu(true);
     pasteAction->setIcon(QIcon::fromTheme("edit-paste"));
     pasteAction->setIconVisibleInMenu(true);
+    selectAllAction->setIcon(QIcon::fromTheme("stock_select-all"));
+    selectAllAction->setIconVisibleInMenu(true);
 
     mainWindow->connect(editor, SIGNAL(copyAvailable(bool)), copyAction, SLOT(setEnabled(bool)));
     mainWindow->connect(editor, SIGNAL(copyAvailable(bool)), cutAction, SLOT(setEnabled(bool)));
