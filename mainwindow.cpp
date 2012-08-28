@@ -82,6 +82,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
       openRecentMenu(fileMenu->addMenu(QObject::tr("Open &Recent"))),
       saveAction(fileMenu->addAction(QObject::tr("&Save"))),
       saveAsAction(fileMenu->addAction(QObject::tr("Save &As"))),
+      revertAction(fileMenu->addAction(QObject::tr("Rever&t"))),
       exportPdfAction(fileMenu->addAction(QObject::tr("Export as P&DF"))),
       exportHtmlAction(fileMenu->addAction(QObject::tr("Export as &HTML"))),
       printAction(fileMenu->addAction(QObject::tr("&Print"))),
@@ -99,6 +100,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
       smartypantsAction(optionsMenu->addAction(QObject::tr("&SmartyPants"))),
       //changeFontAction(optionsMenu->addAction(QObject::tr("Change &Font"))),
       aboutAction(helpMenu->addAction(QObject::tr("&About"))),
+      refreshViewAction(new QAction(QObject::tr("Refresh"), mainWindow)),
       findReplaceDialog(new FindReplaceDialog(mainWindow)),
       toolBar(new tdToolBar(editor))
 {
@@ -171,6 +173,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     mainWindow->connect(openAction, SIGNAL(triggered()), mainWindow, SLOT(openFile()));
     mainWindow->connect(saveAction, SIGNAL(triggered()), mainWindow, SLOT(saveFile()));
     mainWindow->connect(saveAsAction, SIGNAL(triggered()), mainWindow, SLOT(saveFileAs()));
+    mainWindow->connect(revertAction, SIGNAL(triggered()), mainWindow, SLOT(revertFile()));
     //mainWindow->connect(printAction, SIGNAL(triggered()), mainWindow, SLOT(print()));
     mainWindow->connect(exportPdfAction, SIGNAL(triggered()), mainWindow, SLOT(exportPdf()));
     mainWindow->connect(exportHtmlAction, SIGNAL(triggered()), mainWindow, SLOT(exportHtml()));
@@ -188,12 +191,10 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
 
     for (int i = 0; i < MaxRecentFiles; ++i) {
         recentFileActs[i] = openRecentMenu->addAction("");
-        //recentFileActs[i] = new QAction(mainWindow);
         recentFileActs[i]->setVisible(false);
         recentFileActs[i]->setIcon(QIcon::fromTheme("ascii"));
         recentFileActs[i]->setIconVisibleInMenu(true);
-        mainWindow->connect(recentFileActs[i], SIGNAL(triggered()),
-                            mainWindow, SLOT(openRecentFile()));
+        mainWindow->connect(recentFileActs[i], SIGNAL(triggered()), mainWindow, SLOT(openRecentFile()));
     }
     openRecentMenu->addSeparator();
     clearRecentFilesAction = openRecentMenu->addAction(QObject::tr("&Clear list"));
@@ -324,8 +325,10 @@ tdMainWindow::tdMainWindow(QWidget *parent)
     /*
     toolBar->addSeparator();
     QAction *refreshAction = toolBar->addAction(QIcon::fromTheme("reload"), tr("Reload"));
-    connect(refreshAction, SIGNAL(triggered()), ui->view, SLOT(reload()));
     */
+    ui->refreshViewAction->setIcon(QIcon::fromTheme("reload"));
+    ui->refreshViewAction->setIconVisibleInMenu(true);
+    connect(ui->refreshViewAction, SIGNAL(triggered()), ui->view, SLOT(reload()));
 
     ui->exportHtmlAction->setIcon(QIcon::fromTheme("gnome-mime-text-html"));
     ui->exportPdfAction->setIcon(QIcon::fromTheme("gnome-mime-application-pdf"));
@@ -458,6 +461,7 @@ void tdMainWindow::showViewContextMenu(const QPoint &pos)
 {
     QMenu menu;
     menu.addAction(ui->selectAllAction);
+    menu.addAction(ui->refreshViewAction);
     menu.addSeparator();
     QAction *viewSourceAction = menu.addAction(tr("View source"));
     QAction *action = menu.exec(ui->view->mapToGlobal(pos));
@@ -571,6 +575,7 @@ void tdMainWindow::setModificationStatus(bool modified)
     else if (hasStar && !modified)
         setWindowTitle(title.remove(0, 1));
     ui->saveAction->setEnabled(modified);
+    ui->revertAction->setEnabled(!file.isEmpty() && modified);
 }
 
 void tdMainWindow::newFile()
@@ -611,6 +616,24 @@ void tdMainWindow::saveFileAs()
                         filePath() + "/" + (file.isEmpty() ? "Untitled.md" : file));
     if (!name.isEmpty())
         writeToFile(name);
+}
+
+void tdMainWindow::revertFile()
+{
+    if (file.isEmpty())
+        return;
+
+    QFileInfo info(file);
+    QString name = info.baseName();
+
+    QMessageBox msgBox;
+    msgBox.setText(tr("Are you sure you want to revert '%1' to the last saved version?").arg(name));
+    msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    msgBox.setIcon(QMessageBox::Warning);
+
+    if (QMessageBox::Ok == msgBox.exec())
+        loadFile(file, false);
 }
 
 //void tdMainWindow::print()
@@ -690,8 +713,6 @@ void tdMainWindow::loadFile(QString filename, bool confirm)
     f.close();
     setWindowTitle(info.fileName());
     ui->editor->document()->setModified(false);
-
-//    QString fileId = info.filePath() + " " + info.fileName();
 
     updateRecentFilesList();
 }

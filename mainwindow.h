@@ -49,6 +49,7 @@ struct tdMainWindowUi
     QAction      *clearRecentFilesAction;
     QAction      *const saveAction;
     QAction      *const saveAsAction;
+    QAction      *const revertAction;
     QAction      *const exportPdfAction;
     QAction      *const exportHtmlAction;
     QAction      *const printAction;
@@ -66,6 +67,7 @@ struct tdMainWindowUi
     QAction      *const smartypantsAction;
     //QAction      *const changeFontAction;
     QAction      *const aboutAction;
+    QAction      *const refreshViewAction;
     FindReplaceDialog *const findReplaceDialog;
     tdToolBar    *const toolBar;
     QAction      *recentFileActs[MaxRecentFiles];
@@ -116,6 +118,7 @@ protected slots:
     void openFile();
     void saveFile();
     void saveFileAs();
+    void revertFile();
     //void print();
     void exportPdf();
     void exportHtml();
