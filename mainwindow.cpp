@@ -98,7 +98,6 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
       wordWrapAction(optionsMenu->addAction(QObject::tr("&Word Wrap"))),
       lineNumbersAction(optionsMenu->addAction(QObject::tr("&Line Numbers"))),
       smartypantsAction(optionsMenu->addAction(QObject::tr("&SmartyPants"))),
-      //changeFontAction(optionsMenu->addAction(QObject::tr("Change &Font"))),
       aboutAction(helpMenu->addAction(QObject::tr("&About"))),
       refreshViewAction(new QAction(QObject::tr("Refresh"), mainWindow)),
       findReplaceDialog(new FindReplaceDialog(mainWindow)),
@@ -161,8 +160,6 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     printAction->setIconVisibleInMenu(true);
 //    exportPdfAction->setIcon(QIcon::fromTheme("pdf"));
 //    exportPdfAction->setIconVisibleInMenu(true);
-
-    saveAction->setEnabled(false);
 
     newAction->setShortcut(QKeySequence("Ctrl+N"));
     saveAction->setShortcut(QKeySequence("Ctrl+S"));
@@ -275,7 +272,6 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     mainWindow->connect(wordWrapAction, SIGNAL(toggled(bool)), editor, SLOT(setWordWrapEnabled(bool)));
     mainWindow->connect(lineNumbersAction, SIGNAL(toggled(bool)), editor, SLOT(setLineNumbersEnabled(bool)));
     mainWindow->connect(editorModeAction, SIGNAL(toggled(bool)), mainWindow, SLOT(setEditorEnabled(bool)));
-    //mainWindow->connect(changeFontAction, SIGNAL(triggered()), mainWindow, SLOT(changeViewFont()));
 
     /* Help menu */
 
@@ -315,6 +311,8 @@ tdMainWindow::tdMainWindow(QWidget *parent)
     ui->toolBar->insertAction(first, ui->newAction);
     ui->toolBar->insertAction(first, ui->openAction);
     ui->toolBar->insertAction(first, ui->saveAction);
+    ui->revertAction->setIcon(QIcon::fromTheme("revert"));
+    ui->toolBar->insertAction(first, ui->revertAction);
     ui->toolBar->insertSeparator(first);
     ui->toolBar->addSeparator();
     ui->toolBar->addAction(ui->findAction);
@@ -343,12 +341,14 @@ tdMainWindow::tdMainWindow(QWidget *parent)
         ui->view->page()->mainFrame()->documentElement().findFirst("body").addClass("markdown-body");
     }
     updateViewStyle();
-
     updateRecentFilesActions();
+    setModificationStatus(false);
+    readSettings();
 }
 
 tdMainWindow::~tdMainWindow()
 {    
+    writeSettings();
     delete ui;
 }
 
@@ -478,7 +478,6 @@ void tdMainWindow::updateStatusBarMessage()
     stream << "("       << cursor.columnNumber()
            << ", "      << cursor.blockNumber() + 1
            << ") pos: " << cursor.position();
-
     statusBar()->showMessage(str);
 }
 
@@ -700,8 +699,18 @@ void tdMainWindow::loadFile(QString filename, bool confirm)
         return;
 
     QFile f(filename);
-    if (!f.open(QIODevice::ReadWrite | QIODevice::Text))
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QSettings settings;
+        QStringList files = settings.value("recentFileList").toStringList();
+        files.removeAll(filename);
+        settings.setValue("recentFileList", files);
+        updateRecentFilesActions();
+        QMessageBox msgBox;
+        msgBox.setText(tr("Error opening file:\n%1?").arg(filename));
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.exec();
         return;
+    }
 
     file = filename;
     QFileInfo info(f);
@@ -742,12 +751,6 @@ void tdMainWindow::clearRecentFiles()
     settings.setValue("recentFileList", files);
     updateRecentFilesActions();
 }
-
-//void tdMainWindow::changeViewFont()
-//{
-//    ui->view->setFont(QFontDialog::getFont(0, ui->view->font()));
-//    updateViewStyle();
-//}
 
 void tdMainWindow::writeToFile(QString name)
 {
@@ -841,8 +844,8 @@ void tdMainWindow::updateRecentFilesList()
     files.prepend(file);
     while (files.size() > tdMainWindowUi::MaxRecentFiles)
         files.removeLast();
-     settings.setValue("recentFileList", files);
-     updateRecentFilesActions();
+    settings.setValue("recentFileList", files);
+    updateRecentFilesActions();
 }
 
 void tdMainWindow::updateRecentFilesActions()
@@ -858,4 +861,22 @@ void tdMainWindow::updateRecentFilesActions()
     for (int j = n; j < tdMainWindowUi::MaxRecentFiles; ++j)
         ui->recentFileActs[j]->setVisible(false);
     ui->openRecentMenu->setEnabled(n > 0);
+}
+
+void tdMainWindow::readSettings()
+{
+    QSettings settings;
+    settings.beginGroup("MainWindow");
+    resize(settings.value("size", QSize(400, 400)).toSize());
+    move(settings.value("pos", QPoint(200, 200)).toPoint());
+    settings.endGroup();
+}
+
+void tdMainWindow::writeSettings()
+{
+    QSettings settings;
+    settings.beginGroup("MainWindow");
+    settings.setValue("size", size());
+    settings.setValue("pos", pos());
+    settings.endGroup();
 }

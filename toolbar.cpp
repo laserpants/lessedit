@@ -1,7 +1,7 @@
 #include <QTextDocument>
 #include <QTextBlock>
 #include <QAction>
-#include <QDebug>
+#include <QToolButton>
 #include "toolbar.h"
 #include "codewidget.h"
 
@@ -18,7 +18,6 @@ void tdToolCursor::takeOne()
 
 void tdToolCursor::prependSpaces(int s)
 {
-    //assert(s);
     movePosition(QTextCursor::StartOfLine);
     stripCharAtPos(position(), '>');
     int d = charCount(' ');
@@ -74,7 +73,6 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
     : QToolBar(parent),
       editor(widget),
       hashAction(addAction(tr("Hash"))),
-      unhashAction(addAction(tr("Unhash"))),
       codeAction(addAction(tr("Code"))),
       emphasizeAction(addAction(tr("Emphasize"))),
       strongAction(addAction(tr("Strong"))),
@@ -85,8 +83,7 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
     codeAction->setIcon(QIcon::fromTheme("terminal"));
     emphasizeAction->setIcon(QIcon::fromTheme("text_italic"));
     strongAction->setIcon(QIcon::fromTheme("text_bold"));
-    //hashAction->setIcon(QIcon::fromTheme("gtk_go-down"));
-    //unhashAction->setIcon(QIcon::fromTheme("gtk_go-up"));
+    hashAction->setIcon(QIcon(":/marker.png"));
     blockquoteAction->setIcon(QIcon::fromTheme("stock_text_indent"));
 
     setMovable(false);
@@ -94,7 +91,6 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
     setFloatable(false);
 
     connect(hashAction, SIGNAL(triggered()), this, SLOT(insertHash()));
-    connect(unhashAction, SIGNAL(triggered()), this, SLOT(removeHash()));
     connect(codeAction, SIGNAL(triggered()), this, SLOT(makeCode()));
     connect(emphasizeAction, SIGNAL(triggered()), this, SLOT(emphasize()));
     connect(strongAction, SIGNAL(triggered()), this, SLOT(makeStrong()));
@@ -102,13 +98,20 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
     connect(uncodeAction, SIGNAL(triggered()), this, SLOT(removeCode()));
     connect(editor, SIGNAL(cursorPositionChanged()), this, SLOT(refreshButtonStatus()));
     connect(editor, SIGNAL(selectionChanged()), this, SLOT(refreshButtonStatus()));
+
+    hashActionButton = qobject_cast<QToolButton *>(widgetForAction(hashAction));
+    hashActionButton->installEventFilter(this);
+
+    widgetForAction(codeAction)->installEventFilter(this);
+    widgetForAction(emphasizeAction)->installEventFilter(this);
+    widgetForAction(strongAction)->installEventFilter(this);
+    widgetForAction(blockquoteAction)->installEventFilter(this);
 }
 
 void tdToolBar::refreshButtonStatus()
 {
     tdToolCursor cursor(editor->textCursor());
     QTextDocument *doc = cursor.document();
-
     bool ml = false;
     bool hs = cursor.hasSelection();
     if (hs) {
@@ -120,15 +123,29 @@ void tdToolBar::refreshButtonStatus()
         emphasizeAction->setEnabled(false);
         strongAction->setEnabled(false);
     }
-    if (!hs || !ml) {
-        cursor.movePosition(QTextCursor::StartOfLine);
-        int n = cursor.charCount('#');
-        unhashAction->setEnabled(n);
-        hashAction->setEnabled(n < 6);
-    } else {
-        unhashAction->setEnabled(false);
-        hashAction->setEnabled(false);
+    hashAction->setEnabled(!hs || !ml);
+}
+
+bool tdToolBar::eventFilter(QObject *object, QEvent *event)
+{
+    int type = event->type();
+    if (QEvent::MouseButtonPress == type || QEvent::MouseButtonRelease == type) {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+        if (Qt::RightButton != mouseEvent->button())
+            return QToolBar::eventFilter(object, event);
+        QToolButton *tb;
+        if (hashActionButton == object) {
+            tb = hashActionButton;
+            if (QEvent::MouseButtonRelease == type)
+                removeHash();
+        } else {
+            tb = qobject_cast<QToolButton *>(object);
+            if (QEvent::MouseButtonRelease == type)
+                removeCode();
+        }
+        if (tb) tb->setDown(QEvent::MouseButtonPress == type);
     }
+    return QToolBar::eventFilter(object, event);
 }
 
 void tdToolBar::insertHash()
@@ -146,7 +163,8 @@ void tdToolBar::insertHash()
         else {
             int d = cursor.charCount(' ');
             if (d > 1) {
-                cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, d - 1);
+                cursor.movePosition(QTextCursor::Right,
+                                    QTextCursor::KeepAnchor, d - 1);
                 cursor.removeSelectedText();
             }
         }
@@ -263,7 +281,7 @@ void tdToolBar::makeCodeIndentation(bool indent)
         } else {
             cursor.stripCharAtPos(start - 1, '`');
             cursor.stripCharAtPos(end - 1, '`');
-            // -------------------------------------
+            // ---------------------------------
             cursor.stripCharAtPos(start - 1, '*');
             cursor.stripCharAtPos(end - 1, '*');
             cursor.stripCharAtPos(start - 2, '*');
@@ -272,7 +290,8 @@ void tdToolBar::makeCodeIndentation(bool indent)
         cursor.endEditBlock();
         if (indent) {
             cursor.setPosition(start + offs);
-            cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, end - start);
+            cursor.movePosition(QTextCursor::Right,
+                                QTextCursor::KeepAnchor, end - start);
             editor->setTextCursor(cursor);
         }
     }
@@ -302,7 +321,8 @@ void tdToolBar::wrap(QChar ch, int t)
         cursor.insertText(str);
         cursor.endEditBlock();
         cursor.setPosition(start + offs);
-        cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, end - start);
+        cursor.movePosition(QTextCursor::Right,
+                            QTextCursor::KeepAnchor, end - start);
         editor->setTextCursor(cursor);
     }
 }

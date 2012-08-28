@@ -17,6 +17,7 @@ public:
 };
 
 class QAction;
+class QToolButton;
 class tdCodeWidget;
 
 class tdToolBar : public QToolBar
@@ -29,6 +30,9 @@ public:
 
 public slots:
     void refreshButtonStatus();
+
+protected:
+    bool eventFilter(QObject *object, QEvent *event);
 
 protected slots:
     void insertHash();
@@ -45,12 +49,12 @@ private:
 
     tdCodeWidget *const editor;
     QAction      *const hashAction;
-    QAction      *const unhashAction;
     QAction      *const codeAction;
     QAction      *const emphasizeAction;
     QAction      *const strongAction;
     QAction      *const blockquoteAction;
     QAction      *const uncodeAction;
+    QToolButton  *hashActionButton;
 };
 
 #endif // TOOLBAR_H

@@ -1,8 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>credits.txt</file>
-        <file>icon.png</file>
         <file>styles.css</file>
         <file>dirty-shade.png</file>
+        <file>icon.png</file>
+        <file>marker.png</file>
     </qresource>
 </RCC>

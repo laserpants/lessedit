@@ -65,7 +65,6 @@ struct tdMainWindowUi
     QAction      *const wordWrapAction;
     QAction      *const lineNumbersAction;
     QAction      *const smartypantsAction;
-    //QAction      *const changeFontAction;
     QAction      *const aboutAction;
     QAction      *const refreshViewAction;
     FindReplaceDialog *const findReplaceDialog;
@@ -124,7 +123,6 @@ protected slots:
     void exportHtml();
     void loadFile(QString filename, bool confirm = true);
     void setEditorEnabled(bool enabled);
-    //void changeViewFont();
     void openRecentFile();
     void clearRecentFiles();
 
@@ -136,6 +134,8 @@ private:
     void setToolBarActionsEnabled(bool enabled);
     void updateRecentFilesList();
     void updateRecentFilesActions();
+    void readSettings();
+    void writeSettings();
 
     tdMainWindowUi    *const ui;
     tdHtmlHighlighter *const highlighter;
