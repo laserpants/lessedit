@@ -150,7 +150,10 @@ void FindReplaceForm::find(bool next) {
         qDebug() << "searching for regexp: " << reg.pattern();
 
         textCursor = textEdit->document()->find(reg, textCursor, flags);
-        textEdit->setTextCursor(textCursor);
+
+        if (!textCursor.isNull())
+            textEdit->setTextCursor(textCursor);
+
         result = (!textCursor.isNull());
     } else {
         qDebug() << "searching for: " << toSearch;
