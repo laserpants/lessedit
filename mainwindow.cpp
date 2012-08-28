@@ -15,6 +15,8 @@
 #include <QPrinter>
 #include <QMessageBox>
 #include <QApplication>
+#include <QSettings>
+//#include <QFontDialog>
 #include <QDebug>
 #include "mainwindow.h"
 #include "codewidget.h"
@@ -22,6 +24,7 @@
 #include "tidy.h"
 #include "renderer.h"
 #include "findreplace/findreplacedialog.h"
+#include "toolbar.h"
 
 tdAboutDialog::tdAboutDialog(QWidget *parent)
     : QDialog(parent)
@@ -38,7 +41,7 @@ tdAboutDialog::tdAboutDialog(QWidget *parent)
     img->setContentsMargins(24, 0, 0, 0);
 
     QLabel *label = new QLabel;
-    label->setText("<h1>LessEdit 0.9</h1><p>A WYSIWYG markdown editor.<br>&copy; 2012 Johannes Hild&eacute;n</p><p><a href=\"https://github.com/johanneshilden/lessedit\">https://github.com/johanneshilden/lessedit</a></p><h3>Credits &amp; License");
+    label->setText("<h1>LessEdit 0.95</h1><p>A WYSIWYG markdown editor.<br>&copy; 2012 Johannes Hild&eacute;n</p><p><a href=\"https://github.com/johanneshilden/lessedit\">https://github.com/johanneshilden/lessedit</a></p><h3>Credits &amp; License");
     label->setAlignment(Qt::AlignCenter);
 
     QTextEdit *credits = new QTextEdit;
@@ -76,6 +79,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
       helpMenu(mainWindow->menuBar()->addMenu(QObject::tr("&Help"))),
       newAction(fileMenu->addAction(QObject::tr("&New"))),
       openAction(fileMenu->addAction(QObject::tr("&Open"))),
+      openRecentMenu(fileMenu->addMenu(QObject::tr("Open &Recent"))),
       saveAction(fileMenu->addAction(QObject::tr("&Save"))),
       saveAsAction(fileMenu->addAction(QObject::tr("Save &As"))),
       exportPdfAction(fileMenu->addAction(QObject::tr("Export as P&DF"))),
@@ -93,8 +97,10 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
       wordWrapAction(optionsMenu->addAction(QObject::tr("&Word Wrap"))),
       lineNumbersAction(optionsMenu->addAction(QObject::tr("&Line Numbers"))),
       smartypantsAction(optionsMenu->addAction(QObject::tr("&SmartyPants"))),
+      //changeFontAction(optionsMenu->addAction(QObject::tr("Change &Font"))),
       aboutAction(helpMenu->addAction(QObject::tr("&About"))),
-      findReplaceDialog(new FindReplaceDialog(mainWindow))
+      findReplaceDialog(new FindReplaceDialog(mainWindow)),
+      toolBar(new tdToolBar(editor))
 {
     findReplaceDialog->setTextEdit(editor);
     findReplaceDialog->setModal(true);
@@ -154,6 +160,8 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
 //    exportPdfAction->setIcon(QIcon::fromTheme("pdf"));
 //    exportPdfAction->setIconVisibleInMenu(true);
 
+    saveAction->setEnabled(false);
+
     newAction->setShortcut(QKeySequence("Ctrl+N"));
     saveAction->setShortcut(QKeySequence("Ctrl+S"));
     openAction->setShortcut(QKeySequence("Ctrl+O"));
@@ -175,6 +183,21 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     exitAction->setIconVisibleInMenu(true);
 
     mainWindow->connect(exitAction, SIGNAL(triggered()), mainWindow, SLOT(close()));
+
+    /* Recent file actions */
+
+    for (int i = 0; i < MaxRecentFiles; ++i) {
+        recentFileActs[i] = openRecentMenu->addAction("");
+        //recentFileActs[i] = new QAction(mainWindow);
+        recentFileActs[i]->setVisible(false);
+        recentFileActs[i]->setIcon(QIcon::fromTheme("ascii"));
+        recentFileActs[i]->setIconVisibleInMenu(true);
+        mainWindow->connect(recentFileActs[i], SIGNAL(triggered()),
+                            mainWindow, SLOT(openRecentFile()));
+    }
+    openRecentMenu->addSeparator();
+    clearRecentFilesAction = openRecentMenu->addAction(QObject::tr("&Clear list"));
+    mainWindow->connect(clearRecentFilesAction, SIGNAL(triggered()), mainWindow, SLOT(clearRecentFiles()));
 
     /* Edit menu */
 
@@ -243,9 +266,15 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     smartypantsAction->setCheckable(true);
     smartypantsAction->setChecked(true);
 
+    //changeFontAction->setIcon(QIcon::fromTheme("fonts"));
+    //changeFontAction->setIconVisibleInMenu(true);
+
+    //optionsMenu->insertSeparator(changeFontAction);
+
     mainWindow->connect(wordWrapAction, SIGNAL(toggled(bool)), editor, SLOT(setWordWrapEnabled(bool)));
     mainWindow->connect(lineNumbersAction, SIGNAL(toggled(bool)), editor, SLOT(setLineNumbersEnabled(bool)));
     mainWindow->connect(editorModeAction, SIGNAL(toggled(bool)), mainWindow, SLOT(setEditorEnabled(bool)));
+    //mainWindow->connect(changeFontAction, SIGNAL(triggered()), mainWindow, SLOT(changeViewFont()));
 
     /* Help menu */
 
@@ -253,25 +282,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     aboutAction->setIconVisibleInMenu(true);
     aboutAction->setShortcut(QKeySequence("F1"));
 
-    mainWindow->connect(aboutAction, SIGNAL(triggered()), aboutDialog, SLOT(show()));
-
-    //
-
-    QWebElement de = view->page()->mainFrame()->documentElement();
-    QWebElement styleElement = de.findFirst("style");
-    if (styleElement.isNull()) {
-        QWebElement head = de.findFirst("head");
-        head.appendInside("<style type=\"text/css\"></style>");
-        styleElement = de.findFirst("style");
-    }
-    QString css = "body { margin:0; padding:0 9px; font-family:sans-serif; }";
-    QFile cssFile(":/styles.css");
-    if (cssFile.open(QFile::ReadOnly)) {
-        css.append(cssFile.readAll());
-        QWebElement body = de.findFirst("body");
-        body.addClass("markdown-body");
-    }
-    styleElement.setPlainText(css);
+    mainWindow->connect(aboutAction, SIGNAL(triggered()), aboutDialog, SLOT(show()));    
 }
 
 tdMainWindow::tdMainWindow(QWidget *parent)
@@ -298,6 +309,39 @@ tdMainWindow::tdMainWindow(QWidget *parent)
     ui->view->installEventFilter(this);
 
     setWindowTitle(tr("(Untitled)"));
+
+    QAction *first = ui->toolBar->actions().first();
+    ui->toolBar->insertAction(first, ui->newAction);
+    ui->toolBar->insertAction(first, ui->openAction);
+    ui->toolBar->insertAction(first, ui->saveAction);
+    ui->toolBar->insertSeparator(first);
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(ui->findAction);
+    //ui->toolBar->addAction(ui->changeFontAction);
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(ui->exportHtmlAction);
+    ui->toolBar->addAction(ui->exportPdfAction);
+    /*
+    toolBar->addSeparator();
+    QAction *refreshAction = toolBar->addAction(QIcon::fromTheme("reload"), tr("Reload"));
+    connect(refreshAction, SIGNAL(triggered()), ui->view, SLOT(reload()));
+    */
+
+    ui->exportHtmlAction->setIcon(QIcon::fromTheme("gnome-mime-text-html"));
+    ui->exportPdfAction->setIcon(QIcon::fromTheme("gnome-mime-application-pdf"));
+
+    addToolBar(ui->toolBar);
+
+    //
+
+    QFile cssFile(":/styles.css");
+    if (cssFile.open(QFile::ReadOnly)) {
+        viewCss.append(cssFile.readAll());
+        ui->view->page()->mainFrame()->documentElement().findFirst("body").addClass("markdown-body");
+    }
+    updateViewStyle();
+
+    updateRecentFilesActions();
 }
 
 tdMainWindow::~tdMainWindow()
@@ -322,6 +366,9 @@ bool tdMainWindow::eventFilter(QObject *object, QEvent *event)
             }
         } else if (Qt::Key_Tab == keyEvent->key()) {
             ui->editor->insertPlainText("    ");
+            return true;
+        } else if (Qt::Key_Return == keyEvent->key() && modifiers & Qt::SHIFT) {
+            ui->editor->insertPlainText("\n");
             return true;
         }
     }
@@ -440,11 +487,14 @@ void tdMainWindow::refreshTab(int tab)
         updateSource();
         connect(ui->undoAction, SIGNAL(triggered()), this, SLOT(updateSource()));
         connect(ui->redoAction, SIGNAL(triggered()), this, SLOT(updateSource()));
+        setToolBarActionsEnabled(false);
         break;
     }
     default:
         disconnect(ui->undoAction, SIGNAL(triggered()), this, SLOT(updateSource()));
         disconnect(ui->redoAction, SIGNAL(triggered()), this, SLOT(updateSource()));
+        setToolBarActionsEnabled(true);
+        ui->toolBar->refreshButtonStatus();
     } // end switch
 }
 
@@ -515,8 +565,12 @@ void tdMainWindow::copy()
 void tdMainWindow::setModificationStatus(bool modified)
 {
     QString title = windowTitle();
-    if (!title.startsWith("*") && modified)
+    bool hasStar = title.startsWith("*");
+    if (!hasStar && modified)
         setWindowTitle("*" + title);
+    else if (hasStar && !modified)
+        setWindowTitle(title.remove(0, 1));
+    ui->saveAction->setEnabled(modified);
 }
 
 void tdMainWindow::newFile()
@@ -636,6 +690,10 @@ void tdMainWindow::loadFile(QString filename, bool confirm)
     f.close();
     setWindowTitle(info.fileName());
     ui->editor->document()->setModified(false);
+
+//    QString fileId = info.filePath() + " " + info.fileName();
+
+    updateRecentFilesList();
 }
 
 void tdMainWindow::setEditorEnabled(bool enabled)
@@ -648,6 +706,27 @@ void tdMainWindow::setEditorEnabled(bool enabled)
     ui->wordWrapAction->setEnabled(enabled);
     ui->lineNumbersAction->setEnabled(enabled);
 }
+
+void tdMainWindow::openRecentFile()
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (action)
+        loadFile(action->data().toString());
+}
+
+void tdMainWindow::clearRecentFiles()
+{
+    QSettings settings;
+    QStringList files;
+    settings.setValue("recentFileList", files);
+    updateRecentFilesActions();
+}
+
+//void tdMainWindow::changeViewFont()
+//{
+//    ui->view->setFont(QFontDialog::getFont(0, ui->view->font()));
+//    updateViewStyle();
+//}
 
 void tdMainWindow::writeToFile(QString name)
 {
@@ -665,6 +744,8 @@ void tdMainWindow::writeToFile(QString name)
     QApplication::restoreOverrideCursor();
     setWindowTitle(info.fileName());
     ui->editor->document()->setModified(false);
+
+    updateRecentFilesList();
 }
 
 bool tdMainWindow::confirmSaveIfModified()
@@ -702,4 +783,58 @@ QString tdMainWindow::filePath() const
         return QDir::homePath();
     QFileInfo info(file);
     return info.path();
+}
+
+void tdMainWindow::updateViewStyle()
+{
+    QWebElement de = ui->view->page()->mainFrame()->documentElement();
+    QWebElement styleElement = de.findFirst("style");
+    if (styleElement.isNull()) {
+        QWebElement head = de.findFirst("head");
+        head.appendInside("<style type=\"text/css\"></style>");
+        styleElement = de.findFirst("style");
+    }
+    //assert(!styleElement.isNull());
+    QFont font("sans-serif");
+    QString css = "body { margin:0; padding:0 9px; font-family:" + font.family() + "; }";
+    css.append(viewCss);
+    styleElement.setPlainText(css);
+}
+
+void tdMainWindow::setToolBarActionsEnabled(bool enabled)
+{
+    QList<QAction *> actions = ui->toolBar->actions();
+    QList<QAction *>::const_iterator i = actions.constBegin();
+    for (; i != actions.constEnd(); ++i) {
+        QAction *a = *i;
+        if (ui->toolBar == a->parent())
+            a->setEnabled(enabled);
+    }
+}
+
+void tdMainWindow::updateRecentFilesList()
+{
+    QSettings settings;
+    QStringList files = settings.value("recentFileList").toStringList();
+    files.removeAll(file);
+    files.prepend(file);
+    while (files.size() > tdMainWindowUi::MaxRecentFiles)
+        files.removeLast();
+     settings.setValue("recentFileList", files);
+     updateRecentFilesActions();
+}
+
+void tdMainWindow::updateRecentFilesActions()
+{
+    QSettings settings;
+    QStringList files = settings.value("recentFileList").toStringList();
+    int n = files.count();
+    for (int i = 0; i < n; ++i) {
+        ui->recentFileActs[i]->setText(QFileInfo(files[i]).fileName());
+        ui->recentFileActs[i]->setData(files[i]);
+        ui->recentFileActs[i]->setVisible(true);
+    }
+    for (int j = n; j < tdMainWindowUi::MaxRecentFiles; ++j)
+        ui->recentFileActs[j]->setVisible(false);
+    ui->openRecentMenu->setEnabled(n > 0);
 }

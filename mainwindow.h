@@ -22,10 +22,15 @@ class QWebView;
 class QTabWidget;
 class QTextEdit;
 class tdCodeWidget;
+class tdToolBar;
 class FindReplaceDialog;
 
 struct tdMainWindowUi
 {
+    enum {
+        MaxRecentFiles = 10
+    };
+
     tdMainWindowUi(QMainWindow *mainWindow);
 
     QTabWidget   *const tabWidget;
@@ -40,6 +45,8 @@ struct tdMainWindowUi
     QMenu        *const helpMenu;
     QAction      *const newAction;
     QAction      *const openAction;
+    QMenu        *const openRecentMenu;
+    QAction      *clearRecentFilesAction;
     QAction      *const saveAction;
     QAction      *const saveAsAction;
     QAction      *const exportPdfAction;
@@ -57,8 +64,11 @@ struct tdMainWindowUi
     QAction      *const wordWrapAction;
     QAction      *const lineNumbersAction;
     QAction      *const smartypantsAction;
+    //QAction      *const changeFontAction;
     QAction      *const aboutAction;
     FindReplaceDialog *const findReplaceDialog;
+    tdToolBar    *const toolBar;
+    QAction      *recentFileActs[MaxRecentFiles];
 };
 
 class QFile;
@@ -111,11 +121,18 @@ protected slots:
     void exportHtml();
     void loadFile(QString filename, bool confirm = true);
     void setEditorEnabled(bool enabled);
+    //void changeViewFont();
+    void openRecentFile();
+    void clearRecentFiles();
 
 private:
     void writeToFile(QString name);
     bool confirmSaveIfModified();
     QString filePath() const;
+    void updateViewStyle();
+    void setToolBarActionsEnabled(bool enabled);
+    void updateRecentFilesList();
+    void updateRecentFilesActions();
 
     tdMainWindowUi    *const ui;
     tdHtmlHighlighter *const highlighter;
@@ -123,6 +140,7 @@ private:
     tdRenderer        *const renderer;
     FocusWidget        focus;
     QString            file;
+    QString            viewCss;
 };
 
 #endif // MAINWINDOW_H

@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     findreplace/findreplaceform.cpp \
     findreplace/findreplacedialog.cpp \
     findreplace/findform.cpp \
-    findreplace/finddialog.cpp
+    findreplace/finddialog.cpp \
+    toolbar.cpp
 
 HEADERS  += mainwindow.h \
     codewidget.h \
@@ -48,7 +49,8 @@ HEADERS  += mainwindow.h \
     findreplace/findreplaceform.h \
     findreplace/findreplacedialog.h \
     findreplace/findform.h \
-    findreplace/finddialog.h
+    findreplace/finddialog.h \
+    toolbar.h
 
 FORMS += \
     findreplace/findreplaceform.ui \
