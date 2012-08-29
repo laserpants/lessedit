@@ -11,7 +11,6 @@ tdCodeWidget::tdCodeWidget(QWidget *parent)
       m_paintLineNumbers(true)
 {
     setFont(QFont("monospace"));
-    m_lineNumberWidget->setFont(font());
 
     connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
@@ -67,6 +66,12 @@ void tdCodeWidget::resizeEvent(QResizeEvent *event)
     QPlainTextEdit::resizeEvent(event);
     QRect cr = contentsRect();
     m_lineNumberWidget->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+}
+
+void tdCodeWidget::changeEvent(QEvent *e)
+{
+    if (QEvent::FontChange == e->type())
+        m_lineNumberWidget->setFont(font());
 }
 
 void tdCodeWidget::highlightCurrentLine()

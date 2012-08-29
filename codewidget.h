@@ -26,6 +26,7 @@ public slots:
 
 protected:
     void resizeEvent(QResizeEvent *event);
+    void changeEvent(QEvent *e);
 
 private slots:
     void highlightCurrentLine();
