@@ -72,6 +72,7 @@ void tdCodeWidget::changeEvent(QEvent *e)
 {
     if (QEvent::FontChange == e->type())
         m_lineNumberWidget->setFont(font());
+    QPlainTextEdit::changeEvent(e);
 }
 
 void tdCodeWidget::highlightCurrentLine()
