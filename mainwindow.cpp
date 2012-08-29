@@ -16,7 +16,7 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QSettings>
-//#include <QFontDialog>
+#include <QDesktopServices>
 #include <QDebug>
 #include "mainwindow.h"
 #include "codewidget.h"
@@ -115,6 +115,9 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     view->setHtml("<html><head><style></style></head><body></body></html>");
     view->setContextMenuPolicy(Qt::CustomContextMenu);
     view->setAcceptDrops(false);
+    view->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+
+    mainWindow->connect(view, SIGNAL(linkClicked(QUrl)), mainWindow, SLOT(openUrl(QUrl)));
     mainWindow->connect(view, SIGNAL(customContextMenuRequested(QPoint)),
                         mainWindow, SLOT(showViewContextMenu(QPoint)));
 
@@ -523,7 +526,8 @@ void tdMainWindow::selectAll()
 void tdMainWindow::updateSource()
 {
     QWebElement body = ui->view->page()->mainFrame()->findFirstElement("body");
-    QString str = body.toInnerXml().remove(QRegExp("\\s?class=\"__[\\d]*__\""));
+    //QString str = body.toInnerXml().remove(QRegExp("\\s?class=\"__[\\d]*__\""));
+    QString str = body.toInnerXml().remove(QRegExp("(\\s?class=\"__[\\d]*__\")|(\s?__[\\d]*__\s?)"));
     ui->source->setPlainText(tidy->tidy(str));
 }
 
@@ -581,10 +585,8 @@ void tdMainWindow::newFile()
 {
     if (!confirmSaveIfModified())
         return;
-
     ui->editor->clear();
     renderer->refreshAll();
-
     setWindowTitle(tr("(Untitled)"));
     file.clear();
     updateSource();
@@ -594,7 +596,6 @@ void tdMainWindow::openFile()
 {
     if (!confirmSaveIfModified())
         return;
-
     loadFile(QFileDialog::getOpenFileName(this, tr("Open"), filePath(),
                                           "Markdown files (*.md *.markdown);;"
                                           "Text files (*.txt);;"
@@ -682,14 +683,12 @@ void tdMainWindow::exportHtml()
         return;
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
-
     updateSource();
     QString html = "<!DOCTYPE html>\n<html>\n<head>\n<title>Untitled</title>\n</head>\n<body>\n"
             + ui->source->toPlainText() + "</body>\n</html>";
     QTextStream stream(&file);
     stream << html;
     file.close();
-
     QApplication::restoreOverrideCursor();
 }
 
@@ -700,11 +699,13 @@ void tdMainWindow::loadFile(QString filename, bool confirm)
 
     QFile f(filename);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        /*
         QSettings settings;
         QStringList files = settings.value("recentFileList").toStringList();
         files.removeAll(filename);
         settings.setValue("recentFileList", files);
         updateRecentFilesActions();
+        */
         QMessageBox msgBox;
         msgBox.setText(tr("Error opening file:\n%1?").arg(filename));
         msgBox.setIcon(QMessageBox::Warning);
@@ -728,11 +729,7 @@ void tdMainWindow::loadFile(QString filename, bool confirm)
 
 void tdMainWindow::setEditorEnabled(bool enabled)
 {
-    if (enabled)
-        ui->editor->show();
-    else
-        ui->editor->hide();
-    //
+    ui->editor->setVisible(enabled);
     ui->wordWrapAction->setEnabled(enabled);
     ui->lineNumbersAction->setEnabled(enabled);
 }
@@ -750,6 +747,11 @@ void tdMainWindow::clearRecentFiles()
     QStringList files;
     settings.setValue("recentFileList", files);
     updateRecentFilesActions();
+}
+
+void tdMainWindow::openUrl(QUrl url)
+{
+    QDesktopServices::openUrl(url);
 }
 
 void tdMainWindow::writeToFile(QString name)

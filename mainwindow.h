@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QPaintEvent>
 #include <QPainter>
+#include <QUrl>
 
 class tdAboutDialog : public QDialog
 {
@@ -118,13 +119,13 @@ protected slots:
     void saveFile();
     void saveFileAs();
     void revertFile();
-    //void print();
     void exportPdf();
     void exportHtml();
     void loadFile(QString filename, bool confirm = true);
     void setEditorEnabled(bool enabled);
     void openRecentFile();
     void clearRecentFiles();
+    void openUrl(QUrl url);
 
 private:
     void writeToFile(QString name);
