@@ -527,7 +527,7 @@ void tdMainWindow::updateSource()
 {
     QWebElement body = ui->view->page()->mainFrame()->findFirstElement("body");
     //QString str = body.toInnerXml().remove(QRegExp("\\s?class=\"__[\\d]*__\""));
-    QString str = body.toInnerXml().remove(QRegExp("(\\s?class=\"__[\\d]*__\")|(\s?__[\\d]*__\s?)"));
+    QString str = body.toInnerXml().remove(QRegExp("(\\s?class=\"__[\\d]*__\")|(\\s?__[\\d]*__\\s?)"));
     ui->source->setPlainText(tidy->tidy(str));
 }
 
