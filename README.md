@@ -13,7 +13,7 @@ All rights reserved.
 Sundown
 -------
 
-Sundown is based on the original Upskirt parser by Natacha Porté, with many
+Sundown is based on the original Upskirt parser by Natacha Port&eacute;, with many
 additions by Vicent Marti (@tanoku) and contributions from the following
 authors:
 
