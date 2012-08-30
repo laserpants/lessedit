@@ -1,8 +1,7 @@
 About
 =====
 
-LessEdit is a WYSIWYG Markdown editor written in C++ using the Qt Library,
-based on Sundown and the Qt WebKit rendering engine.
+LessEdit is a WYSIWYG Markdown editor written in C++ using the Qt Library. It is based on the Sundown parser and Qt's WebKit rendering engine.
 
 Markdown/SmartyPants
 --------------------
