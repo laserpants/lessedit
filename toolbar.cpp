@@ -95,7 +95,7 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
       emphasizeAction(addAction(tr("Emphasize"))),
       strongAction(addAction(tr("Strong"))),
       blockquoteAction(addAction(tr("Blockquote"))),
-      linebreakAction(addAction(tr("Linebreak"))),
+      linebreakAction(addAction(tr("Insert linebreak"))),
       uncodeAction(addAction(tr("Clear formatting")))
 {
     uncodeAction->setIcon(QIcon::fromTheme("edit-clear"));
@@ -104,7 +104,7 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
     strongAction->setIcon(QIcon::fromTheme("text_bold"));
     hashAction->setIcon(QIcon(":/marker.png"));
     blockquoteAction->setIcon(QIcon::fromTheme("stock_text_indent"));
-    linebreakAction->setIcon(QIcon::fromTheme(""));
+    linebreakAction->setIcon(QIcon(":/enter.png"));
 
     setMovable(false);
     setContextMenuPolicy(Qt::CustomContextMenu);
