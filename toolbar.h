@@ -14,6 +14,7 @@ public:
     void stripCharAtPos(int pos, QChar ch);
     int charCount(QChar ch) const;
     void blockquote();
+    void linebreak();
 };
 
 class QAction;
@@ -42,6 +43,7 @@ protected slots:
     void makeStrong();
     void removeCode();
     void makeBlockquote();
+    void insertLineBreak();
 
 private:
     void makeCodeIndentation(bool indent = true);
@@ -53,6 +55,7 @@ private:
     QAction      *const emphasizeAction;
     QAction      *const strongAction;
     QAction      *const blockquoteAction;
+    QAction      *const linebreakAction;
     QAction      *const uncodeAction;
     QToolButton  *hashActionButton;
 };

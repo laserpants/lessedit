@@ -69,6 +69,24 @@ void tdToolCursor::blockquote()
     }
 }
 
+void tdToolCursor::linebreak()
+{
+    /*
+    movePosition(QTextCursor::EndOfLine);
+    int eol = position();
+    int pos = eol - 2;
+    if (pos < block().position())
+        return;
+    int i = 0;
+    while (pos < eol)
+        if (' ' == document()->characterAt(pos++))
+            ++i;
+    while (i++ < 2)
+        insertText(" ");
+    */
+    insertText("  \n");
+}
+
 tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
     : QToolBar(parent),
       editor(widget),
@@ -77,6 +95,7 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
       emphasizeAction(addAction(tr("Emphasize"))),
       strongAction(addAction(tr("Strong"))),
       blockquoteAction(addAction(tr("Blockquote"))),
+      linebreakAction(addAction(tr("Linebreak"))),
       uncodeAction(addAction(tr("Clear formatting")))
 {
     uncodeAction->setIcon(QIcon::fromTheme("edit-clear"));
@@ -85,6 +104,7 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
     strongAction->setIcon(QIcon::fromTheme("text_bold"));
     hashAction->setIcon(QIcon(":/marker.png"));
     blockquoteAction->setIcon(QIcon::fromTheme("stock_text_indent"));
+    linebreakAction->setIcon(QIcon::fromTheme(""));
 
     setMovable(false);
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -95,6 +115,7 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
     connect(emphasizeAction, SIGNAL(triggered()), this, SLOT(emphasize()));
     connect(strongAction, SIGNAL(triggered()), this, SLOT(makeStrong()));
     connect(blockquoteAction, SIGNAL(triggered()), this, SLOT(makeBlockquote()));
+    connect(linebreakAction, SIGNAL(triggered()), this, SLOT(insertLineBreak()));
     connect(uncodeAction, SIGNAL(triggered()), this, SLOT(removeCode()));
     connect(editor, SIGNAL(cursorPositionChanged()), this, SLOT(refreshButtonStatus()));
     connect(editor, SIGNAL(selectionChanged()), this, SLOT(refreshButtonStatus()));
@@ -124,6 +145,7 @@ void tdToolBar::refreshButtonStatus()
         strongAction->setEnabled(false);
     }
     hashAction->setEnabled(!hs || !ml);
+    linebreakAction->setEnabled(!hs);
 }
 
 bool tdToolBar::eventFilter(QObject *object, QEvent *event)
@@ -229,6 +251,36 @@ void tdToolBar::makeBlockquote()
         }
         cursor.endEditBlock();
     }
+    refreshButtonStatus();
+}
+
+void tdToolBar::insertLineBreak()
+{
+    tdToolCursor cursor(editor->textCursor());
+    if (cursor.hasSelection())
+        return;
+    else
+        cursor.linebreak();
+    /*
+    int start = cursor.selectionStart();
+    int end = cursor.selectionEnd();
+
+    if (!cursor.hasSelection()) {
+        cursor.beginEditBlock();
+        cursor.linebreak();
+        cursor.endEditBlock();
+    } else {
+        cursor.beginEditBlock();
+        int endBlock = doc->findBlock(end).blockNumber();
+        cursor.setPosition(start);
+        int i = cursor.block().blockNumber();
+        while (i++ <= endBlock) {
+            cursor.linebreak();
+            cursor.movePosition(QTextCursor::NextBlock);
+        }
+        cursor.endEditBlock();
+    }
+    */
     refreshButtonStatus();
 }
 
