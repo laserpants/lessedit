@@ -725,6 +725,7 @@ void tdMainWindow::loadFile(QString filename, bool confirm)
     ui->editor->document()->setModified(false);
 
     updateRecentFilesList();
+    updateSource();
 }
 
 void tdMainWindow::setEditorEnabled(bool enabled)
