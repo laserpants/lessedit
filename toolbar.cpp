@@ -71,19 +71,6 @@ void tdToolCursor::blockquote()
 
 void tdToolCursor::linebreak()
 {
-    /*
-    movePosition(QTextCursor::EndOfLine);
-    int eol = position();
-    int pos = eol - 2;
-    if (pos < block().position())
-        return;
-    int i = 0;
-    while (pos < eol)
-        if (' ' == document()->characterAt(pos++))
-            ++i;
-    while (i++ < 2)
-        insertText(" ");
-    */
     insertText("  \n");
 }
 
@@ -261,26 +248,6 @@ void tdToolBar::insertLineBreak()
         return;
     else
         cursor.linebreak();
-    /*
-    int start = cursor.selectionStart();
-    int end = cursor.selectionEnd();
-
-    if (!cursor.hasSelection()) {
-        cursor.beginEditBlock();
-        cursor.linebreak();
-        cursor.endEditBlock();
-    } else {
-        cursor.beginEditBlock();
-        int endBlock = doc->findBlock(end).blockNumber();
-        cursor.setPosition(start);
-        int i = cursor.block().blockNumber();
-        while (i++ <= endBlock) {
-            cursor.linebreak();
-            cursor.movePosition(QTextCursor::NextBlock);
-        }
-        cursor.endEditBlock();
-    }
-    */
     refreshButtonStatus();
 }
 
