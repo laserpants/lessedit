@@ -167,47 +167,7 @@ void FindReplaceForm::find(bool next)
         showError(tr("No match found."));
         // move to the beginning of the document for the next find
         textEdit->moveCursor(QTextCursor::Start);
-//        textCursor.setPosition(0);
-//        textEdit->setTextCursor(textCursor);
     }
-
-    /*
-    int i = 0;
-    int pos = 0;
-
-    while (i < 2) {
-        if (ui->regexCheckBox->isChecked()) {
-            QRegExp reg(toSearch,
-                        (ui->caseCheckBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive));
-
-            qDebug() << "searching for regexp: " << reg.pattern();
-
-            textCursor = textEdit->document()->find(reg, textCursor, flags);
-            textEdit->setTextCursor(textCursor);
-            result = (!textCursor.isNull());
-        } else {
-            qDebug() << "searching for: " << toSearch;
-
-            result = textEdit->find(toSearch, flags);
-        }
-
-        if (result) {
-            showError("");
-            break;
-        } else {
-            showError(tr("No match found."));
-            // move to the beginning of the document for the next find
-            if (!i) {
-                pos = textEdit->textCursor().position();
-                textEdit->moveCursor(QTextCursor::Start);
-            }
-        }
-        ++i;
-    }
-    if (!result && pos)
-        for (int j = 0; j < pos; ++j)
-            textEdit->moveCursor(QTextCursor::NextCharacter);
-    */
 }
 
 void FindReplaceForm::replace()

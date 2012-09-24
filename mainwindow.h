@@ -64,7 +64,7 @@ struct tdMainWindowUi
     QAction      *const newAction;
     QAction      *const openAction;
     QMenu        *const openRecentMenu;
-    QAction      *clearRecentFilesAction;
+    QAction      *const clearRecentFilesAction;
     QAction      *const saveAction;
     QAction      *const saveAsAction;
     QAction      *const revertAction;

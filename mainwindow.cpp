@@ -56,11 +56,14 @@ tdExtensionsDialog::tdExtensionsDialog(QWidget *parent)
 
     QVBoxLayout *main = new QVBoxLayout;
     main->addWidget(gb);
-    QDialogButtonBox *bbox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    QDialogButtonBox *bbox = new QDialogButtonBox(QDialogButtonBox::Ok |
+                                                  QDialogButtonBox::Cancel);
     main->addWidget(bbox);
 
-    connect(bbox->button(QDialogButtonBox::Ok), SIGNAL(clicked()), this, SLOT(accept()));
-    connect(bbox->button(QDialogButtonBox::Cancel), SIGNAL(clicked()), this, SLOT(reject()));
+    connect(bbox->button(QDialogButtonBox::Ok), SIGNAL(clicked()),
+            this, SLOT(accept()));
+    connect(bbox->button(QDialogButtonBox::Cancel), SIGNAL(clicked()),
+            this, SLOT(reject()));
 
     setLayout(main);
 }
@@ -141,6 +144,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
       newAction(fileMenu->addAction(QObject::tr("&New"))),
       openAction(fileMenu->addAction(QObject::tr("&Open"))),
       openRecentMenu(fileMenu->addMenu(QObject::tr("Open &Recent"))),
+      clearRecentFilesAction(openRecentMenu->addAction(QObject::tr("&Clear list"))),
       saveAction(fileMenu->addAction(QObject::tr("&Save"))),
       saveAsAction(fileMenu->addAction(QObject::tr("Save &As"))),
       revertAction(fileMenu->addAction(QObject::tr("Rever&t"))),
@@ -243,14 +247,14 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     /* Recent file actions */
 
     for (int i = 0; i < MaxRecentFiles; ++i) {
-        recentFileActs[i] = openRecentMenu->addAction("");
+        recentFileActs[i] = new QAction("", mainWindow);
+        openRecentMenu->insertAction(clearRecentFilesAction, recentFileActs[i]);
         recentFileActs[i]->setVisible(false);
         recentFileActs[i]->setIcon(QIcon::fromTheme("ascii"));
         recentFileActs[i]->setIconVisibleInMenu(true);
         mainWindow->connect(recentFileActs[i], SIGNAL(triggered()), mainWindow, SLOT(openRecentFile()));
     }
     openRecentMenu->addSeparator();
-    clearRecentFilesAction = openRecentMenu->addAction(QObject::tr("&Clear list"));
     mainWindow->connect(clearRecentFilesAction, SIGNAL(triggered()), mainWindow, SLOT(clearRecentFiles()));
 
     /* Edit menu */
@@ -333,7 +337,8 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     aboutAction->setIconVisibleInMenu(true);
     aboutAction->setShortcut(QKeySequence("F1"));
 
-    mainWindow->connect(aboutAction, SIGNAL(triggered()), aboutDialog, SLOT(show()));    
+    mainWindow->connect(aboutAction, SIGNAL(triggered()),
+                        aboutDialog, SLOT(show()));
 }
 
 tdMainWindow::tdMainWindow(QWidget *parent)
@@ -374,17 +379,12 @@ tdMainWindow::tdMainWindow(QWidget *parent)
     ui->toolBar->addSeparator();
     ui->toolBar->addAction(ui->exportHtmlAction);
     ui->toolBar->addAction(ui->exportPdfAction);
-    /*
-    toolBar->addSeparator();
-    QAction *refreshAction = toolBar->addAction(QIcon::fromTheme("reload"), tr("Reload"));
-    */
     ui->refreshViewAction->setIcon(QIcon::fromTheme("reload"));
     ui->refreshViewAction->setIconVisibleInMenu(true);
     connect(ui->refreshViewAction, SIGNAL(triggered()), ui->view, SLOT(reload()));
 
     ui->exportHtmlAction->setIcon(QIcon::fromTheme("gnome-mime-text-html"));
     ui->exportPdfAction->setIcon(QIcon::fromTheme("gnome-mime-application-pdf"));
-//    ui->exportPdfAction->setIcon(QIcon::fromTheme("epdfview"));
 
     addToolBar(ui->toolBar);
 
@@ -393,7 +393,11 @@ tdMainWindow::tdMainWindow(QWidget *parent)
     QFile cssFile(":/styles.css");
     if (cssFile.open(QFile::ReadOnly)) {
         viewCss.append(cssFile.readAll());
-        ui->view->page()->mainFrame()->documentElement().findFirst("body").addClass("markdown-body");
+        ui->view->page()
+                ->mainFrame()
+                ->documentElement().
+                findFirst("body").
+                addClass("markdown-body");
     }
     updateViewStyle();
     updateRecentFilesActions();
@@ -739,13 +743,6 @@ void tdMainWindow::loadFile(QString filename, bool confirm)
 
     QFile f(filename);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        /*
-        QSettings settings;
-        QStringList files = settings.value("recentFileList").toStringList();
-        files.removeAll(filename);
-        settings.setValue("recentFileList", files);
-        updateRecentFilesActions();
-        */
         QMessageBox msgBox;
         msgBox.setText(tr("Error opening file:\n%1?").arg(filename));
         msgBox.setIcon(QMessageBox::Warning);
@@ -813,7 +810,6 @@ void tdMainWindow::writeToFile(QString name)
         return;
 
     tdMainWindow::file = name;
-
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QTextStream stream(&file);
     stream << ui->editor->toPlainText();
@@ -873,7 +869,8 @@ void tdMainWindow::updateViewStyle()
         styleElement = de.findFirst("style");
     }
     QFont font("sans-serif");
-    QString css = "body { margin:0; padding:0 9px; font-family:" + font.family() + "; }";
+    QString css = "body { margin:0; padding:0 9px; "
+                  "font-family:" + font.family() + "; }";
     css.append(viewCss);
     styleElement.setPlainText(css);
 }

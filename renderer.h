@@ -43,7 +43,7 @@ public:
     inline void undo() { m_isUndoRedo = true; m_undoStack->undo(); }
     inline void redo() { m_isUndoRedo = true; m_undoStack->redo(); }
 
-    int extensionsFlags() const;
+    inline int extensionsFlags() const { return m_ext; }
     void setExtensionsFlags(int flags);
 
 signals:
@@ -67,10 +67,10 @@ private:
 
     int             m_ext;
     QPlainTextEdit *const m_editor;
+    QUndoStack     *const m_undoStack;
     buf            *const m_buffer;
     buf            *const m_tmpbuffer;
     sd_markdown    *m_markdown;
-    QUndoStack     *const m_undoStack;
     sd_callbacks    m_callbacks;
     html_renderopt  m_options;
     QList<int>      m_sizes;

@@ -108,7 +108,6 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
     connect(editor, SIGNAL(cursorPositionChanged()), this, SLOT(refreshButtonStatus()));
     connect(editor, SIGNAL(selectionChanged()), this, SLOT(refreshButtonStatus()));
 
-//    hashActionButton = qobject_cast<QToolButton *>(widgetForAction(hashAction));
     hashActionButton->installEventFilter(this);
 
     widgetForAction(codeAction)->installEventFilter(this);

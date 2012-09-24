@@ -42,10 +42,10 @@ tdRenderer::tdRenderer(QPlainTextEdit *editor, int extensions, QWebElement body)
     : QObject(editor),
       m_ext(extensions),
       m_editor(editor),
+      m_undoStack(new QUndoStack(this)),
       m_buffer(bufnew(1024)),
       m_tmpbuffer(bufnew(1024)),
       m_markdown(initSundown()),
-      m_undoStack(new QUndoStack(this)),
       m_body(body),
       m_fframe(0),
       m_lframe(0),
@@ -68,11 +68,6 @@ tdRenderer::~tdRenderer()
     bufrelease(m_buffer);
     bufrelease(m_tmpbuffer);
     sd_markdown_free(m_markdown);
-}
-
-int tdRenderer::extensionsFlags() const
-{
-    return m_ext;
 }
 
 void tdRenderer::setExtensionsFlags(int flags)

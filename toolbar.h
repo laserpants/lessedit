@@ -57,7 +57,7 @@ private:
     QAction      *const blockquoteAction;
     QAction      *const linebreakAction;
     QAction      *const uncodeAction;
-    QToolButton  *hashActionButton;
+    QToolButton  *const hashActionButton;
 };
 
 #endif // TOOLBAR_H
