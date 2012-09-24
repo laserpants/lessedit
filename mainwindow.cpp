@@ -45,6 +45,15 @@ tdExtensionsDialog::tdExtensionsDialog(QWidget *parent)
     m_checkBoxes.push_back(new QCheckBox(tr("Superscript")));
     m_checkBoxes.push_back(new QCheckBox(tr("Lax spacing")));
 
+//  MKDEXT_NO_INTRA_EMPHASIS = (1 << 0),
+//	MKDEXT_TABLES = (1 << 1),
+//	MKDEXT_FENCED_CODE = (1 << 2),
+//	MKDEXT_AUTOLINK = (1 << 3),
+//	MKDEXT_STRIKETHROUGH = (1 << 4),
+//	MKDEXT_SPACE_HEADERS = (1 << 6),
+//	MKDEXT_SUPERSCRIPT = (1 << 7),
+//	MKDEXT_LAX_SPACING = (1 << 8),
+
     layout->addWidget(m_checkBoxes.at(0), 0, 0);
     layout->addWidget(m_checkBoxes.at(1), 1, 0);
     layout->addWidget(m_checkBoxes.at(2), 2, 0);
@@ -73,16 +82,17 @@ void tdExtensionsDialog::updateCheckBoxes(int flags)
     int n = 1;
     for (int i = 0; i < 8; ++i) {
         m_checkBoxes.at(i)->setChecked((flags & n));
-        n <<= 1;
+        n <<= ((i == 4) ? 2 : 1);
     }
 }
 
 int tdExtensionsDialog::flags() const
 {
     int flags = 0;
-    for (int i = 0; i < 8; ++i)
+    for (int i = 0; i < 8; ++i) {
         if (m_checkBoxes.at(i)->isChecked())
-            flags |= (1 << i);
+            flags |= (1 << ((i > 4) ? i+1:i));
+    }
     return flags;
 }
 
@@ -384,7 +394,8 @@ tdMainWindow::tdMainWindow(QWidget *parent)
     connect(ui->refreshViewAction, SIGNAL(triggered()), ui->view, SLOT(reload()));
 
     ui->exportHtmlAction->setIcon(QIcon::fromTheme("gnome-mime-text-html"));
-    ui->exportPdfAction->setIcon(QIcon::fromTheme("gnome-mime-application-pdf"));
+    //ui->exportPdfAction->setIcon(QIcon::fromTheme("gnome-mime-application-pdf"));
+    ui->exportPdfAction->setIcon(QIcon(":/evince.png"));
 
     addToolBar(ui->toolBar);
 
@@ -837,7 +848,9 @@ bool tdMainWindow::confirmSaveIfModified()
 
     QMessageBox msgBox;
     msgBox.setText(tr("Save changes to '%1'?").arg(name));
-    msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes);
+    msgBox.setStandardButtons(QMessageBox::Cancel |
+                              QMessageBox::No |
+                              QMessageBox::Yes);
     msgBox.setDefaultButton(QMessageBox::Yes);
     msgBox.setIcon(QMessageBox::Warning);
 
