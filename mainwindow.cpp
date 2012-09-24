@@ -33,7 +33,7 @@ tdExtensionsDialog::tdExtensionsDialog(QWidget *parent)
     : QDialog(parent)
 {
     QGridLayout *layout = new QGridLayout;
-    QGroupBox *gb = new QGroupBox(tr("Enabled Markdown extensions:"));
+    QGroupBox *gb = new QGroupBox(tr("Enabled extensions:"));
     gb->setLayout(layout);
 
     m_checkBoxes.push_back(new QCheckBox(tr("No intra emphasis")));
@@ -394,7 +394,6 @@ tdMainWindow::tdMainWindow(QWidget *parent)
     connect(ui->refreshViewAction, SIGNAL(triggered()), ui->view, SLOT(reload()));
 
     ui->exportHtmlAction->setIcon(QIcon::fromTheme("gnome-mime-text-html"));
-    //ui->exportPdfAction->setIcon(QIcon::fromTheme("gnome-mime-application-pdf"));
     ui->exportPdfAction->setIcon(QIcon(":/evince.png"));
 
     addToolBar(ui->toolBar);
