@@ -98,7 +98,11 @@ tdAboutDialog::tdAboutDialog(QWidget *parent)
     img->setContentsMargins(24, 0, 0, 0);
 
     QLabel *label = new QLabel;
-    label->setText("<h1>LessEdit 0.95</h1><p>A WYSIWYG markdown editor.<br>&copy; 2012 Johannes Hild&eacute;n</p><p><a href=\"https://github.com/johanneshilden/lessedit\">https://github.com/johanneshilden/lessedit</a></p><h3>Credits &amp; License");
+    label->setText("<h1>LessEdit 0.95</h1><p>A WYSIWYG markdown editor.<br>"
+                   "&copy; 2012 Johannes Hild&eacute;n</p>"
+                   "<p><a href=\"https://github.com/johanneshilden/lessedit\">"
+                   "https://github.com/johanneshilden/lessedit</a></p>"
+                   "<h3>Credits &amp; License");
     label->setAlignment(Qt::AlignCenter);
 
     QTextEdit *credits = new QTextEdit;
@@ -142,7 +146,6 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
       revertAction(fileMenu->addAction(QObject::tr("Rever&t"))),
       exportPdfAction(fileMenu->addAction(QObject::tr("Export as P&DF"))),
       exportHtmlAction(fileMenu->addAction(QObject::tr("Export as &HTML"))),
-      printAction(fileMenu->addAction(QObject::tr("&Print"))),
       undoAction(editMenu->addAction(QObject::tr("&Undo"))),
       redoAction(editMenu->addAction(QObject::tr("&Redo"))),
       cutAction(editMenu->addAction(QObject::tr("Cu&t"))),
@@ -205,8 +208,6 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
 
     /* File menu */
 
-    fileMenu->removeAction(printAction);        // temp
-//    fileMenu->insertSeparator(printAction);
     fileMenu->insertSeparator(saveAction);
     fileMenu->insertSeparator(exportPdfAction);
     fileMenu->addSeparator();
@@ -219,31 +220,21 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     saveAction->setIconVisibleInMenu(true);
     saveAsAction->setIcon(QIcon::fromTheme("document-save"));
     saveAsAction->setIconVisibleInMenu(true);
-    printAction->setIcon(QIcon::fromTheme("document-print"));
-    printAction->setIconVisibleInMenu(true);
-//    exportPdfAction->setIcon(QIcon::fromTheme("pdf"));
-//    exportPdfAction->setIconVisibleInMenu(true);
-//    exportPdfAction->setIcon(QIcon::fromTheme("epdfview"));
-//    exportPdfAction->setIconVisibleInMenu(true);
 
     newAction->setShortcut(QKeySequence("Ctrl+N"));
     saveAction->setShortcut(QKeySequence("Ctrl+S"));
     openAction->setShortcut(QKeySequence("Ctrl+O"));
-    printAction->setShortcut(QKeySequence("Ctrl+P"));
 
     mainWindow->connect(newAction, SIGNAL(triggered()), mainWindow, SLOT(newFile()));
     mainWindow->connect(openAction, SIGNAL(triggered()), mainWindow, SLOT(openFile()));
     mainWindow->connect(saveAction, SIGNAL(triggered()), mainWindow, SLOT(saveFile()));
     mainWindow->connect(saveAsAction, SIGNAL(triggered()), mainWindow, SLOT(saveFileAs()));
     mainWindow->connect(revertAction, SIGNAL(triggered()), mainWindow, SLOT(revertFile()));
-    //mainWindow->connect(printAction, SIGNAL(triggered()), mainWindow, SLOT(print()));
     mainWindow->connect(exportPdfAction, SIGNAL(triggered()), mainWindow, SLOT(exportPdf()));
     mainWindow->connect(exportHtmlAction, SIGNAL(triggered()), mainWindow, SLOT(exportHtml()));
 
     QAction *exitAction = fileMenu->addAction(QObject::tr("E&xit"));
     exitAction->setShortcut(QKeySequence("Ctrl+Q"));
-
-
     exitAction->setIcon(QIcon::fromTheme("exit"));
     exitAction->setIconVisibleInMenu(true);
 
@@ -329,10 +320,6 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     smartypantsAction->setCheckable(true);
     smartypantsAction->setChecked(true);
 
-    //changeFontAction->setIcon(QIcon::fromTheme("fonts"));
-    //changeFontAction->setIconVisibleInMenu(true);
-
-    //optionsMenu->insertSeparator(changeFontAction);
     optionsMenu->insertSeparator(extensionsAction);
 
     mainWindow->connect(wordWrapAction, SIGNAL(toggled(bool)), editor, SLOT(setWordWrapEnabled(bool)));
@@ -384,7 +371,6 @@ tdMainWindow::tdMainWindow(QWidget *parent)
     ui->toolBar->insertSeparator(first);
     ui->toolBar->addSeparator();
     ui->toolBar->addAction(ui->findAction);
-    //ui->toolBar->addAction(ui->changeFontAction);
     ui->toolBar->addSeparator();
     ui->toolBar->addAction(ui->exportHtmlAction);
     ui->toolBar->addAction(ui->exportPdfAction);
@@ -592,7 +578,6 @@ void tdMainWindow::selectAll()
 void tdMainWindow::updateSource()
 {
     QWebElement body = ui->view->page()->mainFrame()->findFirstElement("body");
-    //QString str = body.toInnerXml().remove(QRegExp("\\s?class=\"__[\\d]*__\""));
     QString str = body.toInnerXml().remove(QRegExp("(\\s?class=\"__[\\d]*__\")|(\\s?__[\\d]*__)"));
     ui->source->setPlainText(tidy->tidy(str));
 }
@@ -701,17 +686,6 @@ void tdMainWindow::revertFile()
     if (QMessageBox::Ok == msgBox.exec())
         loadFile(file, false);
 }
-
-//void tdMainWindow::print()
-//{
-//    // @todo
-//    QPrinter printer;
-//    QPrintDialog printDialog(&printer, this);
-//    printDialog.setOption(QPrintDialog::PrintPageRange, false);
-//    if (printDialog.exec() == QDialog::Accepted) {
-//        qDebug() << "...printing??";
-//    }
-//}
 
 void tdMainWindow::exportPdf()
 {
@@ -898,7 +872,6 @@ void tdMainWindow::updateViewStyle()
         head.appendInside("<style type=\"text/css\"></style>");
         styleElement = de.findFirst("style");
     }
-    //assert(!styleElement.isNull());
     QFont font("sans-serif");
     QString css = "body { margin:0; padding:0 9px; font-family:" + font.family() + "; }";
     css.append(viewCss);

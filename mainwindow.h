@@ -70,7 +70,6 @@ struct tdMainWindowUi
     QAction      *const revertAction;
     QAction      *const exportPdfAction;
     QAction      *const exportHtmlAction;
-    QAction      *const printAction;
     QAction      *const undoAction;
     QAction      *const redoAction;
     QAction      *const cutAction;

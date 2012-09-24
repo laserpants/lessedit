@@ -158,7 +158,6 @@ void tdRenderer::parseMarkdown(int at, int removed, int added)
     int klass = 0;
     QWebElementCollection collection;
     while (c++ <= m_lframe && !m_sizes.isEmpty()) {
-        //assert(m_fframe < m_sizes.count());
         m_sizes.takeAt(m_fframe);
         klass = m_indices.takeAt(m_fframe);
         collection.append(m_body.findAll(".__" % QString::number(klass) % "__"));
@@ -219,7 +218,6 @@ void tdRenderer::render(QByteArray ba)
 
     while (beg < e) {
         const char *offs = data + beg;
-
         int n = td_markdown_render(m_buffer, (const uint8_t *) offs,
                                    e - beg, m_markdown);
 

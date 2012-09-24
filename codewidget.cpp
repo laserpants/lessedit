@@ -1,11 +1,10 @@
+#include <QApplication>
 #include <QFont>
 #include <QPainter>
 #include <QTextBlock>
 #include <QUrl>
 #include <QDebug>
 #include "codewidget.h"
-
-#include <QApplication>
 
 tdCodeWidget::tdCodeWidget(QWidget *parent)
     : QPlainTextEdit(parent),
@@ -114,7 +113,7 @@ void tdCodeWidget::paintLineNumbers(QPaintEvent *event)
         return;
 
     QPalette p = QApplication::palette();
-    QColor col = p.background().color();
+//    QColor col = p.background().color();
 
     QPainter painter(m_lineNumberWidget);
     painter.fillRect(event->rect(), QColor::fromRgb(238, 238, 238));

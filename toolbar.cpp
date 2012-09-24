@@ -83,7 +83,8 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
       strongAction(addAction(tr("Strong"))),
       blockquoteAction(addAction(tr("Blockquote"))),
       linebreakAction(addAction(tr("Insert linebreak"))),
-      uncodeAction(addAction(tr("Clear formatting")))
+      uncodeAction(addAction(tr("Clear formatting"))),
+      hashActionButton(qobject_cast<QToolButton *>(widgetForAction(hashAction)))
 {
     uncodeAction->setIcon(QIcon::fromTheme("edit-clear"));
     codeAction->setIcon(QIcon::fromTheme("terminal"));
@@ -107,7 +108,7 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
     connect(editor, SIGNAL(cursorPositionChanged()), this, SLOT(refreshButtonStatus()));
     connect(editor, SIGNAL(selectionChanged()), this, SLOT(refreshButtonStatus()));
 
-    hashActionButton = qobject_cast<QToolButton *>(widgetForAction(hashAction));
+//    hashActionButton = qobject_cast<QToolButton *>(widgetForAction(hashAction));
     hashActionButton->installEventFilter(this);
 
     widgetForAction(codeAction)->installEventFilter(this);
