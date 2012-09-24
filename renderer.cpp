@@ -38,8 +38,9 @@ void tdRendererCursorCommand::redo()
     }
 }
 
-tdRenderer::tdRenderer(QPlainTextEdit *editor, QWebElement body)
+tdRenderer::tdRenderer(QPlainTextEdit *editor, int extensions, QWebElement body)
     : QObject(editor),
+      m_ext(extensions),
       m_editor(editor),
       m_buffer(bufnew(1024)),
       m_tmpbuffer(bufnew(1024)),
@@ -69,11 +70,25 @@ tdRenderer::~tdRenderer()
     sd_markdown_free(m_markdown);
 }
 
+int tdRenderer::extensionsFlags() const
+{
+    return m_ext;
+}
+
+void tdRenderer::setExtensionsFlags(int flags)
+{
+    sd_markdown_free(m_markdown);
+    m_ext = flags;
+    m_markdown = sd_markdown_new(m_ext, 16, &m_callbacks, &m_options);
+    refreshAll();
+    emit rendererSettingsChanged();
+}
+
 void tdRenderer::setSmartypantsEnabled(bool enabled)
 {
     m_pants = enabled;
     refreshAll();
-    emit smartypantsEnabledChanged();
+    emit rendererSettingsChanged();
 }
 
 void tdRenderer::updateFrameInterval()
@@ -177,7 +192,7 @@ void tdRenderer::parseMarkdown(int at, int removed, int added)
 sd_markdown *tdRenderer::initSundown()
 {
     sdhtml_renderer(&m_callbacks, &m_options, 0);
-    return sd_markdown_new(0, 16, &m_callbacks, &m_options);
+    return sd_markdown_new(m_ext, 16, &m_callbacks, &m_options);
 }
 
 int tdRenderer::block(int offset) const

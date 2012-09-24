@@ -34,7 +34,7 @@ class tdRenderer : public QObject
     Q_OBJECT
 
 public:
-    tdRenderer(QPlainTextEdit *editor, QWebElement body);
+    tdRenderer(QPlainTextEdit *editor, int extensions, QWebElement body);
     ~tdRenderer();
 
     inline QList<int> sizes() const { return m_sizes; }
@@ -43,9 +43,12 @@ public:
     inline void undo() { m_isUndoRedo = true; m_undoStack->undo(); }
     inline void redo() { m_isUndoRedo = true; m_undoStack->redo(); }
 
+    int extensionsFlags() const;
+    void setExtensionsFlags(int flags);
+
 signals:
     void parsingDone();
-    void smartypantsEnabledChanged();
+    void rendererSettingsChanged();
 
 public slots:
     void setSmartypantsEnabled(bool enabled);
@@ -62,10 +65,11 @@ private:
     int block(int offset) const;
     void render(QByteArray ba);
 
+    int             m_ext;
     QPlainTextEdit *const m_editor;
     buf            *const m_buffer;
     buf            *const m_tmpbuffer;
-    sd_markdown    *const m_markdown;
+    sd_markdown    *m_markdown;
     QUndoStack     *const m_undoStack;
     sd_callbacks    m_callbacks;
     html_renderopt  m_options;

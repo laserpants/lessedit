@@ -17,6 +17,9 @@
 #include <QApplication>
 #include <QSettings>
 #include <QDesktopServices>
+#include <QGroupBox>
+#include <QCheckBox>
+#include <QDialogButtonBox>
 #include <QDebug>
 #include "mainwindow.h"
 #include "codewidget.h"
@@ -25,6 +28,60 @@
 #include "renderer.h"
 #include "findreplace/findreplacedialog.h"
 #include "toolbar.h"
+
+tdExtensionsDialog::tdExtensionsDialog(QWidget *parent)
+    : QDialog(parent)
+{
+    QGridLayout *layout = new QGridLayout;
+    QGroupBox *gb = new QGroupBox(tr("Enabled Markdown extensions:"));
+    gb->setLayout(layout);
+
+    m_checkBoxes.push_back(new QCheckBox(tr("No intra emphasis")));
+    m_checkBoxes.push_back(new QCheckBox(tr("Tables")));
+    m_checkBoxes.push_back(new QCheckBox(tr("Fenced code")));
+    m_checkBoxes.push_back(new QCheckBox(tr("Autolink")));
+    m_checkBoxes.push_back(new QCheckBox(tr("Strikethrough")));
+    m_checkBoxes.push_back(new QCheckBox(tr("Space headers")));
+    m_checkBoxes.push_back(new QCheckBox(tr("Superscript")));
+    m_checkBoxes.push_back(new QCheckBox(tr("Lax spacing")));
+
+    layout->addWidget(m_checkBoxes.at(0), 0, 0);
+    layout->addWidget(m_checkBoxes.at(1), 1, 0);
+    layout->addWidget(m_checkBoxes.at(2), 2, 0);
+    layout->addWidget(m_checkBoxes.at(3), 3, 0);
+    layout->addWidget(m_checkBoxes.at(4), 0, 1);
+    layout->addWidget(m_checkBoxes.at(5), 1, 1);
+    layout->addWidget(m_checkBoxes.at(6), 2, 1);
+    layout->addWidget(m_checkBoxes.at(7), 3, 1);
+
+    QVBoxLayout *main = new QVBoxLayout;
+    main->addWidget(gb);
+    QDialogButtonBox *bbox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    main->addWidget(bbox);
+
+    connect(bbox->button(QDialogButtonBox::Ok), SIGNAL(clicked()), this, SLOT(accept()));
+    connect(bbox->button(QDialogButtonBox::Cancel), SIGNAL(clicked()), this, SLOT(reject()));
+
+    setLayout(main);
+}
+
+void tdExtensionsDialog::updateCheckBoxes(int flags)
+{
+    int n = 1;
+    for (int i = 0; i < 8; ++i) {
+        m_checkBoxes.at(i)->setChecked((flags & n));
+        n <<= 1;
+    }
+}
+
+int tdExtensionsDialog::flags() const
+{
+    int flags = 0;
+    for (int i = 0; i < 8; ++i)
+        if (m_checkBoxes.at(i)->isChecked())
+            flags |= (1 << i);
+    return flags;
+}
 
 tdAboutDialog::tdAboutDialog(QWidget *parent)
     : QDialog(parent)
@@ -98,10 +155,12 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
       wordWrapAction(optionsMenu->addAction(QObject::tr("&Word Wrap"))),
       lineNumbersAction(optionsMenu->addAction(QObject::tr("&Line Numbers"))),
       smartypantsAction(optionsMenu->addAction(QObject::tr("&SmartyPants"))),
+      extensionsAction(optionsMenu->addAction(QObject::tr("E&xtensions"))),
       aboutAction(helpMenu->addAction(QObject::tr("&About"))),
       refreshViewAction(new QAction(QObject::tr("Refresh"), mainWindow)),
       findReplaceDialog(new FindReplaceDialog(mainWindow)),
-      toolBar(new tdToolBar(editor))
+      toolBar(new tdToolBar(editor)),
+      extensionsDialog(new tdExtensionsDialog(mainWindow))
 {
     findReplaceDialog->setTextEdit(editor);
     findReplaceDialog->setModal(true);
@@ -116,6 +175,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     view->setContextMenuPolicy(Qt::CustomContextMenu);
     view->setAcceptDrops(false);
     view->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+    view->setStyleSheet("QWebView { background: #fff; }");
 
     mainWindow->connect(view, SIGNAL(linkClicked(QUrl)), mainWindow, SLOT(openUrl(QUrl)));
     mainWindow->connect(view, SIGNAL(customContextMenuRequested(QPoint)),
@@ -162,6 +222,8 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     printAction->setIcon(QIcon::fromTheme("document-print"));
     printAction->setIconVisibleInMenu(true);
 //    exportPdfAction->setIcon(QIcon::fromTheme("pdf"));
+//    exportPdfAction->setIconVisibleInMenu(true);
+//    exportPdfAction->setIcon(QIcon::fromTheme("epdfview"));
 //    exportPdfAction->setIconVisibleInMenu(true);
 
     newAction->setShortcut(QKeySequence("Ctrl+N"));
@@ -271,10 +333,12 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     //changeFontAction->setIconVisibleInMenu(true);
 
     //optionsMenu->insertSeparator(changeFontAction);
+    optionsMenu->insertSeparator(extensionsAction);
 
     mainWindow->connect(wordWrapAction, SIGNAL(toggled(bool)), editor, SLOT(setWordWrapEnabled(bool)));
     mainWindow->connect(lineNumbersAction, SIGNAL(toggled(bool)), editor, SLOT(setLineNumbersEnabled(bool)));
     mainWindow->connect(editorModeAction, SIGNAL(toggled(bool)), mainWindow, SLOT(setEditorEnabled(bool)));
+    mainWindow->connect(extensionsAction, SIGNAL(triggered()), mainWindow, SLOT(showExtensionsDialog()));
 
     /* Help menu */
 
@@ -290,13 +354,14 @@ tdMainWindow::tdMainWindow(QWidget *parent)
       ui(new tdMainWindowUi(this)),
       highlighter(new tdHtmlHighlighter(ui->source->document())),
       tidy(new tdTidy(this)),
-      renderer(new tdRenderer(ui->editor, ui->view->page()->mainFrame()->findFirstElement("body"))),
+      renderer(new tdRenderer(ui->editor, QSettings().value("extensions").toInt(),
+                              ui->view->page()->mainFrame()->findFirstElement("body"))),
       focus(WidgetEditor)
 {
     connect(ui->editor, SIGNAL(cursorPositionChanged()), this, SLOT(updateStatusBarMessage()));
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(refreshTab(int)));
     connect(ui->smartypantsAction, SIGNAL(toggled(bool)), renderer, SLOT(setSmartypantsEnabled(bool)));
-    connect(renderer, SIGNAL(smartypantsEnabledChanged()), this, SLOT(updateSource()));
+    connect(renderer, SIGNAL(rendererSettingsChanged()), this, SLOT(updateSource()));
     connect(ui->editor, SIGNAL(modificationChanged(bool)), this, SLOT(setModificationStatus(bool)));
     connect(ui->editor, SIGNAL(loadFileRequest(QString)), this, SLOT(loadFile(QString)));
 
@@ -333,6 +398,7 @@ tdMainWindow::tdMainWindow(QWidget *parent)
 
     ui->exportHtmlAction->setIcon(QIcon::fromTheme("gnome-mime-text-html"));
     ui->exportPdfAction->setIcon(QIcon::fromTheme("gnome-mime-application-pdf"));
+//    ui->exportPdfAction->setIcon(QIcon::fromTheme("epdfview"));
 
     addToolBar(ui->toolBar);
 
@@ -753,6 +819,17 @@ void tdMainWindow::clearRecentFiles()
 void tdMainWindow::openUrl(QUrl url)
 {
     QDesktopServices::openUrl(url);
+}
+
+void tdMainWindow::showExtensionsDialog()
+{
+    ui->extensionsDialog->updateCheckBoxes(renderer->extensionsFlags());
+    if (QDialog::Accepted == ui->extensionsDialog->exec()) {
+        int flags = ui->extensionsDialog->flags();
+        renderer->setExtensionsFlags(flags);
+        QSettings settings;
+        settings.setValue("extensions", flags);
+    }
 }
 
 void tdMainWindow::writeToFile(QString name)

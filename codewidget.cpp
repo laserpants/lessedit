@@ -5,6 +5,8 @@
 #include <QDebug>
 #include "codewidget.h"
 
+#include <QApplication>
+
 tdCodeWidget::tdCodeWidget(QWidget *parent)
     : QPlainTextEdit(parent),
       m_lineNumberWidget(new tdCodeWidgetLineNumbers(this)),
@@ -110,6 +112,9 @@ void tdCodeWidget::paintLineNumbers(QPaintEvent *event)
 {
     if (!m_paintLineNumbers)
         return;
+
+    QPalette p = QApplication::palette();
+    QColor col = p.background().color();
 
     QPainter painter(m_lineNumberWidget);
     painter.fillRect(event->rect(), QColor::fromRgb(238, 238, 238));

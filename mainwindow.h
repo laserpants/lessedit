@@ -7,6 +7,23 @@
 #include <QPainter>
 #include <QUrl>
 
+class QCheckBox;
+
+class tdExtensionsDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit tdExtensionsDialog(QWidget *parent = 0);
+    ~tdExtensionsDialog() {}
+
+    void updateCheckBoxes(int flags);
+    int flags() const;
+
+private:
+    QList<QCheckBox *> m_checkBoxes;
+};
+
 class tdAboutDialog : public QDialog
 {
     Q_OBJECT
@@ -66,10 +83,12 @@ struct tdMainWindowUi
     QAction      *const wordWrapAction;
     QAction      *const lineNumbersAction;
     QAction      *const smartypantsAction;
+    QAction      *const extensionsAction;
     QAction      *const aboutAction;
     QAction      *const refreshViewAction;
     FindReplaceDialog *const findReplaceDialog;
     tdToolBar    *const toolBar;
+    tdExtensionsDialog *const extensionsDialog;
     QAction      *recentFileActs[MaxRecentFiles];
 };
 
@@ -126,6 +145,7 @@ protected slots:
     void openRecentFile();
     void clearRecentFiles();
     void openUrl(QUrl url);
+    void showExtensionsDialog();
 
 private:
     void writeToFile(QString name);
