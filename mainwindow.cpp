@@ -194,7 +194,8 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     view->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     view->setStyleSheet("QWebView { background: #fff; }");
 
-    mainWindow->connect(view, SIGNAL(linkClicked(QUrl)), mainWindow, SLOT(openUrl(QUrl)));
+    mainWindow->connect(view, SIGNAL(linkClicked(QUrl)), mainWindow,
+                        SLOT(openUrl(QUrl)));
     mainWindow->connect(view, SIGNAL(customContextMenuRequested(QPoint)),
                         mainWindow, SLOT(showViewContextMenu(QPoint)));
 
@@ -661,10 +662,14 @@ void tdMainWindow::openFile()
 {
     if (!confirmSaveIfModified())
         return;
-    loadFile(QFileDialog::getOpenFileName(this, tr("Open"), filePath(),
-                                          "Markdown files (*.md *.markdown);;"
-                                          "Text files (*.txt);;"
-                                          "Any files (*.*)"), false);
+
+    QString name = QFileDialog::getOpenFileName(this, tr("Open"), filePath(),
+                                              "Markdown files (*.md *.markdown);;"
+                                              "Text files (*.txt);;"
+                                              "Any files (*.*)");
+    if (name.isEmpty())
+        return;
+    loadFile(name, false);
     updateSource();
 }
 
@@ -738,7 +743,8 @@ void tdMainWindow::exportHtml()
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
     updateSource();
-    QString html = "<!DOCTYPE html>\n<html>\n<head>\n<title>Untitled</title>\n</head>\n<body>\n"
+    QString html = "<!DOCTYPE html>\n<html>\n"
+                   "<head>\n<title>Untitled</title>\n</head>\n<body>\n"
             + ui->source->toPlainText() + "</body>\n</html>";
     QTextStream stream(&file);
     stream << html;
