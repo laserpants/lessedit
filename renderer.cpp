@@ -168,10 +168,9 @@ void tdRenderer::parseMarkdown(int at, int removed, int added)
         list.removeAll(element);
         element.setOuterXml("<div class=\"__tmp__\"></div>");
 
-        QList<QWebElement>::const_iterator i = list.constBegin();
-        for (; i != list.constEnd(); ++i) {
-            ((QWebElement) *i).takeFromDocument();
-        }
+        QList<QWebElement>::iterator i = list.begin();
+        for (; i != list.end(); ++i)
+            i->takeFromDocument();
     } else {
         m_body.prependInside("<div class=\"__tmp__\"></div>");
     }
