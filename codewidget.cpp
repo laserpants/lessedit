@@ -2,6 +2,7 @@
 #include <QFont>
 #include <QPainter>
 #include <QTextBlock>
+#include <QMimeData>
 #include <QUrl>
 #include <QDebug>
 #include "codewidget.h"
@@ -46,7 +47,7 @@ bool tdCodeWidget::canInsertFromMimeData(const QMimeData *source) const
 void tdCodeWidget::insertFromMimeData(const QMimeData *source)
 {
     if (source->hasUrls())
-        emit loadFileRequest(source->urls().first().encodedPath());
+        emit loadFileRequest(source->urls().first().toEncoded());
     QPlainTextEdit::insertFromMimeData(source);
 }
 

@@ -110,7 +110,7 @@ void tdRenderer::refreshAll()
 
     int fframe = m_fframe;
     m_fframe = 0;
-    render(m_editor->toPlainText().toAscii());
+    render(m_editor->toPlainText().toLatin1());
     m_fframe = fframe;
 }
 
@@ -175,7 +175,7 @@ void tdRenderer::parseMarkdown(int at, int removed, int added)
         m_body.prependInside("<div class=\"__tmp__\"></div>");
     }
 
-    render(cursor.selection().toPlainText().toAscii());
+    render(cursor.selection().toPlainText().toLatin1());
 
     cursor.endEditBlock();
     updateFrameInterval();
