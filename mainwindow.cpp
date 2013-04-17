@@ -183,7 +183,7 @@ tdMainWindowUi::tdMainWindowUi(QMainWindow *mainWindow)
     findReplaceDialog->setModal(true);
 
     QFont font = editor->font();
-    font.setPointSize(11);
+    font.setPointSize(10);
     editor->setFont(font);
     mainWindow->setCentralWidget(tabWidget);
     tabWidget->setTabPosition(QTabWidget::West);
