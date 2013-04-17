@@ -111,8 +111,8 @@ tdAboutDialog::tdAboutDialog(QWidget *parent)
     img->setContentsMargins(24, 0, 0, 0);
 
     QLabel *label = new QLabel;
-    label->setText("<h1>LessEdit 0.95</h1><p>A WYSIWYG markdown editor.<br>"
-                   "&copy; 2012 Johannes Hild&eacute;n</p>"
+    label->setText("<h1>LessEdit 1.0</h1><p>A WYSIWYG markdown editor.<br>"
+                   "&copy; 2012&ndash;2013 Johannes Hild&eacute;n</p>"
                    "<p><a href=\"https://github.com/johanneshilden/lessedit\">"
                    "https://github.com/johanneshilden/lessedit</a></p>"
                    "<h3>Credits &amp; License");
