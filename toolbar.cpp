@@ -94,6 +94,9 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
     blockquoteAction->setIcon(QIcon::fromTheme("stock_text_indent"));
     linebreakAction->setIcon(QIcon(":/enter.png"));
 
+    strongAction->setShortcut(QKeySequence("Ctrl+B"));
+    emphasizeAction->setShortcut(QKeySequence("Ctrl+I"));
+
     setMovable(false);
     setContextMenuPolicy(Qt::CustomContextMenu);
     setFloatable(false);
