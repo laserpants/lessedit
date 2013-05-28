@@ -443,6 +443,9 @@ bool tdMainWindow::eventFilter(QObject *object, QEvent *event)
         } else if (Qt::Key_Return == keyEvent->key() && modifiers & Qt::SHIFT) {
             ui->editor->insertPlainText("\n");
             return true;
+        } else if (modifiers & Qt::CTRL) {
+            /* Ignore ordinary key events when pressing the Ctrl-key */
+            return true;
         }
     }
 
