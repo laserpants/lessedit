@@ -29,6 +29,9 @@ public:
     explicit tdToolBar(tdCodeWidget *widget, QWidget *parent = 0);
     ~tdToolBar() {}
 
+    bool strongActionIsEnabled() const;
+    bool emphasizeActionIsEnabled() const;
+
 public slots:
     void refreshButtonStatus();
 

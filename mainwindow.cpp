@@ -444,8 +444,14 @@ bool tdMainWindow::eventFilter(QObject *object, QEvent *event)
             ui->editor->insertPlainText("\n");
             return true;
         } else if (modifiers & Qt::CTRL) {
-            /* Ignore ordinary key events when pressing the Ctrl-key */
-            return true;
+            /* This is to prevent unwanted characters to be inserted
+             * when Ctrl-key is pressed. There should be a better way
+               to do this. */
+            int key = keyEvent->key();
+            if ((Qt::Key_S == key && !ui->saveAction->isEnabled())
+            || (Qt::Key_B == key && !ui->toolBar->strongActionIsEnabled())
+            || (Qt::Key_I == key && !ui->toolBar->emphasizeActionIsEnabled()))
+                return true;
         }
     }
 

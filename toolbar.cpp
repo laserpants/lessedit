@@ -119,6 +119,16 @@ tdToolBar::tdToolBar(tdCodeWidget *widget, QWidget *parent)
     widgetForAction(blockquoteAction)->installEventFilter(this);
 }
 
+bool tdToolBar::strongActionIsEnabled() const
+{
+    return strongAction->isEnabled();
+}
+
+bool tdToolBar::emphasizeActionIsEnabled() const
+{
+    return emphasizeAction->isEnabled();
+}
+
 void tdToolBar::refreshButtonStatus()
 {
     tdToolCursor cursor(editor->textCursor());

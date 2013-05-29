@@ -23,6 +23,8 @@ tdCodeWidget::tdCodeWidget(QWidget *parent)
 
     setWordWrapMode(QTextOption::NoWrap);
     setTabStopWidth(fontMetrics().width(QLatin1Char('X')) * 4);
+
+    installEventFilter(this);
 }
 
 int tdCodeWidget::lineNumberAreaWidth() const
