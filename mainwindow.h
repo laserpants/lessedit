@@ -119,6 +119,8 @@ protected:
     bool eventFilter(QObject *object, QEvent *event);
     void closeEvent(QCloseEvent *event);
 
+    QString getSource() const;
+
 protected slots:
     void showEditorContextMenu(const QPoint &pos);
     void showSourceContextMenu(const QPoint &pos);

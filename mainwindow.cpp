@@ -29,6 +29,8 @@
 #include "findreplace/findreplacedialog.h"
 #include "toolbar.h"
 
+#define HTML_REGEXP "(\\s?class=\"__[\\d]*__\")|(\\s?__[\\d]*__)"
+
 tdExtensionsDialog::tdExtensionsDialog(QWidget *parent)
     : QDialog(parent)
 {
@@ -444,13 +446,12 @@ bool tdMainWindow::eventFilter(QObject *object, QEvent *event)
             ui->editor->insertPlainText("\n");
             return true;
         } else if (modifiers & Qt::CTRL) {
-            /* This is to prevent unwanted characters to be inserted
-             * when Ctrl-key is pressed. There should be a better way
-               to do this. */
+            /* This is to prevent key press events to propagate when Ctrl-key
+             * is pressed. There should be a better way to do this. */
             int key = keyEvent->key();
             if ((Qt::Key_S == key && !ui->saveAction->isEnabled())
-            || (Qt::Key_B == key && !ui->toolBar->strongActionIsEnabled())
-            || (Qt::Key_I == key && !ui->toolBar->emphasizeActionIsEnabled()))
+             || (Qt::Key_B == key && !ui->toolBar->strongActionIsEnabled())
+             || (Qt::Key_I == key && !ui->toolBar->emphasizeActionIsEnabled()))
                 return true;
         }
     }
@@ -513,6 +514,12 @@ void tdMainWindow::closeEvent(QCloseEvent *event)
         return;
     }
     QMainWindow::closeEvent(event);
+}
+
+QString tdMainWindow::getSource() const
+{
+    QWebElement body = ui->view->page()->mainFrame()->findFirstElement("body");
+    return body.toInnerXml().remove(QRegExp(HTML_REGEXP));
 }
 
 void tdMainWindow::showEditorContextMenu(const QPoint &pos)
@@ -602,7 +609,7 @@ void tdMainWindow::selectAll()
 void tdMainWindow::updateSource()
 {
     QWebElement body = ui->view->page()->mainFrame()->findFirstElement("body");
-    QString str = body.toInnerXml().remove(QRegExp("(\\s?class=\"__[\\d]*__\")|(\\s?__[\\d]*__)"));
+    QString str = body.toInnerXml().remove(QRegExp(HTML_REGEXP));
     ui->source->setPlainText(tidy->tidy(str));
 }
 
@@ -751,10 +758,9 @@ void tdMainWindow::exportHtml()
         return;
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    updateSource();
     QString html = "<!DOCTYPE html>\n<html>\n"
                    "<head>\n<title>Untitled</title>\n</head>\n<body>\n"
-            + ui->source->toPlainText() + "</body>\n</html>";
+            + getSource() + "</body>\n</html>";
     QTextStream stream(&file);
     stream << html;
     file.close();
