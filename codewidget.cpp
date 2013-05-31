@@ -4,6 +4,8 @@
 #include <QTextBlock>
 #include <QMimeData>
 #include <QUrl>
+#include <QDropEvent>
+#include <QMimeData>
 #include <QDebug>
 #include "codewidget.h"
 
@@ -77,6 +79,16 @@ void tdCodeWidget::changeEvent(QEvent *e)
     if (QEvent::FontChange == e->type())
         m_lineNumberWidget->setFont(font());
     QPlainTextEdit::changeEvent(e);
+}
+
+void tdCodeWidget::dropEvent(QDropEvent *e)
+{
+    const QMimeData *mime = e->mimeData();
+    if (mime->hasUrls()) {
+        QList<QUrl> urls = mime->urls();
+        if (1 == urls.count())
+            emit loadFileRequest(urls.first().toLocalFile());
+    }
 }
 
 void tdCodeWidget::highlightCurrentLine()

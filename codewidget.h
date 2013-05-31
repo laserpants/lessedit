@@ -3,6 +3,8 @@
 
 #include <QPlainTextEdit>
 
+#include <QDebug>
+
 class tdCodeWidgetLineNumbers;
 
 class tdCodeWidget : public QPlainTextEdit
@@ -27,6 +29,7 @@ public slots:
 protected:
     void resizeEvent(QResizeEvent *event);
     void changeEvent(QEvent *e);
+    void dropEvent(QDropEvent *e);
 
 private slots:
     void highlightCurrentLine();

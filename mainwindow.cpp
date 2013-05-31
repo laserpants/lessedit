@@ -775,7 +775,7 @@ void tdMainWindow::loadFile(QString filename, bool confirm)
     QFile f(filename);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox msgBox;
-        msgBox.setText(tr("Error opening file:\n%1?").arg(filename));
+        msgBox.setText(tr("Error opening file:\n%1").arg(filename));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.exec();
         return;
