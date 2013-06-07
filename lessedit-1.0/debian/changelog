@@ -1,0 +1,5 @@
+lessedit (1.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Johannes Hilden <hildenjohannes@gmail.com>  Mon, 03 Jun 2013 13:42:33 +0300

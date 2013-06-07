@@ -1,0 +1,17 @@
+Source: lessedit
+Section: editors
+Priority: optional
+Maintainer: Johannes Hilden <hildenjohannes@gmail.com>
+Build-Depends: debhelper (>= 8.0.0), qt4-qmake, libqt4-dev, cdbs
+Standards-Version: 3.9.3
+Homepage: <https://github.com/johanneshilden/lessedit>
+
+Package: lessedit
+Architecture: amd_64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Markdown editor/viewer that exports to PDF and HTML.
+ .
+ A WYSIWYG Markdown editor based on the Sundown parser and WebKit. 
+ Simple tabbed view interface with both WYSIWYG and HTML output.
+ Also supports SmartyPants and inline HTML. Can export to PDF and HTML.
+ Conveniently acts as a reader in view-mode.

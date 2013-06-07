@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>credits.txt</file>
+        <file>styles.css</file>
+        <file>dirty-shade.png</file>
+        <file>icon.png</file>
+        <file>marker.png</file>
+        <file>enter.png</file>
+        <file>evince.png</file>
+    </qresource>
+</RCC>

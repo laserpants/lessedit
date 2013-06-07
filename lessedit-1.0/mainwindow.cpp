@@ -416,11 +416,6 @@ tdMainWindow::tdMainWindow(QWidget *parent)
     updateRecentFilesActions();
     setModificationStatus(false);
     readSettings();
-
-    QStringList args = QApplication::arguments();
-    if (args.length() > 1) {
-        loadFile(args.at(1), false);
-    }
 }
 
 tdMainWindow::~tdMainWindow()
