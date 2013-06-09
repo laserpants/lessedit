@@ -957,6 +957,9 @@ void tdMainWindow::readSettings()
     settings.beginGroup("MainWindow");
     resize(settings.value("size", QSize(400, 400)).toSize());
     move(settings.value("pos", QPoint(200, 200)).toPoint());
+    ui->wordWrapAction->setChecked(settings.value("wordwrap").toBool());
+    ui->smartypantsAction->setChecked(settings.value("smartypants").toBool());
+    ui->lineNumbersAction->setChecked(settings.value("linenumbers").toBool());
     settings.endGroup();
 }
 
@@ -966,5 +969,8 @@ void tdMainWindow::writeSettings()
     settings.beginGroup("MainWindow");
     settings.setValue("size", size());
     settings.setValue("pos", pos());
+    settings.setValue("wordwrap", ui->wordWrapAction->isChecked());
+    settings.setValue("smartypants", ui->smartypantsAction->isChecked());
+    settings.setValue("linenumbers", ui->lineNumbersAction->isChecked());
     settings.endGroup();
 }
